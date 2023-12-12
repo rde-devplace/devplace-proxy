@@ -1,0 +1,8 @@
+com/kubepattern/kubeproxy/service/GatewayErrorAttributes.class
+com/kubepattern/kubeproxy/controller/ProxyRouterController.class
+com/kubepattern/kubeproxy/filters/CustomTokenRelayFilter.class
+com/kubepattern/kubeproxy/config/GatewayConfig.class
+com/kubepattern/kubeproxy/service/ProxyRouterService.class
+com/kubepattern/kubeproxy/model/ProxyRouter.class
+com/kubepattern/kubeproxy/KubeProxyRenewApplication.class
+com/kubepattern/kubeproxy/repo/ProxyRouterRepository.class

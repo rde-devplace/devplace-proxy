@@ -1,0 +1,160 @@
+server:
+  port: 8080
+logging:
+  level:
+    ROOT: INFO
+#    org.springframework.web: INFO
+#    org.springframework.cloud.gateway: INFO
+#    org.springframework.cloud.gateway.filter.LoggingGlobalFilter: INFO
+#    org.springframework.cloud.context: INFO
+#    org.springframework.security: DEBUG
+#    org.springframework.security.oauth2: DEBUG
+#    org.springframework.security.oauth2.client: DEBUG
+#    org.springframework.security.oauth2.client.endpoint: DEBUG
+#    org.springframework.session: DEBUG
+#    org.springframework.session.jdbc: DEBUG
+#    org.springframework.http.server.reactive: TRACE
+#    org.springframework.http.server.web: TRACE
+#    org.springframework.web.reactive: TRACE
+#    reactive.netty: TRACE
+
+spring:
+  profiles:
+    active: local
+  application:
+    name: kube-proxy-gateway
+management:
+  endpoints:
+    web:
+      exposure:
+        include: busrefresh
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  jpa:
+    open-in-view: true
+    generate-ddl: true
+    show-sql: false
+    hibernate:
+      #ddl-auto: create
+      ddl-auto: update
+      #ddl-auto: create-drop
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        #physical-strategy: cnadata.outbox.util.DBLowerCaseNamingStrategy
+        #physical-strategy: cnadata.outbox.util.DBUpperCaseNamingStrategy
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  datasource:
+    url: jdbc:mariadb://database-1.c7vhecmevmrc.ap-northeast-2.rds.amazonaws.com/mydevdb?allowMultiQueries=true
+    username: admin
+    password: ywyi1004
+    driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      idle-timeout: 300
+      max-lifetime: 300
+      maximum-pool-size: 20
+  cloud:
+    gateway:
+      httpclient:
+        websocket:
+          max-frame-payload-length: 10000000
+    bus:
+      enabled: true
+      refresh:
+        enabled: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: admin
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwt-set-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev/protocol/openid-connect/certs
+          issuer-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev
+      client:
+        provider:
+          keycloak:
+            issuer-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev
+        registration:
+          kube-proxy-renew:
+            provider: keycloak
+            client-id: kube-proxy-renew
+            client-secret: B3x4C4DARIYPVemmXghmxZZdFGhfofWN
+            # implicit를 사용하는 경우 keycloak의 client 설정에서 Implicit Flow Enabled를 ON으로 설정해야 한다.
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - profile
+              - email
+
+---
+server:
+  port: 8080
+  logging:
+    level: DEBUG
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+  jpa:
+    open-in-view: true
+    generate-ddl: true
+    show-sql: false
+    hibernate:
+      #ddl-auto: create
+      ddl-auto: update
+      #ddl-auto: create-drop
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        #physical-strategy: cnadata.outbox.util.DBLowerCaseNamingStrategy
+        #physical-strategy: cnadata.outbox.util.DBUpperCaseNamingStrategy
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      idle-timeout: 300
+      max-lifetime: 300
+      maximum-pool-size: 20
+  cloud:
+    gateway:
+      httpclient:
+        websocket:
+          max-frame-payload-length: 10000000
+    bus:
+      enabled: true
+      refresh:
+        enabled: true
+  rabbitmq:
+    host: my-rabbitmq.devdb.svc.cluster.local
+    port: 5672
+    username: admin
+    password: admin
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwt-set-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev/protocol/openid-connect/certs
+          issuer-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev
+      client:
+        provider:
+          keycloak:
+            issuer-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev
+        registration:
+          kube-proxy-renew:
+            provider: keycloak
+            client-id: kube-proxy-renew
+            client-secret: B3x4C4DARIYPVemmXghmxZZdFGhfofWN
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - profile
+              - email
+              - groups

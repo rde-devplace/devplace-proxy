@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-proxy-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kube-proxy
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8081'
+        prometheus.io/path: '/actuator/prometheus'
+        update: 4caad4e0146c2c6c8c21ccda42be6154
+      labels:
+        app: kube-proxy
+    spec:
+      imagePullSecrets:
+      - name: harbor-registry-secret
+      containers:
+      - name: kube-proxy
+        image: amdp-registry.skamdp.org/mydev-ywyi/kube-proxy:1.0.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DATASOURCE_URL
+          valueFrom:
+            secretKeyRef:
+              name: datasource-secrets
+              key: database-url
+        - name: DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: datasource-secrets
+              key: database-username
+        - name: DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: datasource-secrets
+              key: database-password
+

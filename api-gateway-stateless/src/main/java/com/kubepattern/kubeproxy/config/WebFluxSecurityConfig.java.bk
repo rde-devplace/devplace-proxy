@@ -1,0 +1,42 @@
+package com.kubepattern.kubeproxy.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@EnableWebFluxSecurity
+@Configuration
+public class WebFluxSecurityConfig {
+
+    
+    @Bean
+    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+        http
+            .authorizeExchange(exchanges -> exchanges
+                .pathMatchers("/actuator/**",
+                        "/actuator/**",
+                        "/bus/**",
+                        "/list",
+                        "/api/route/refresh",
+                        "/listRoutes",
+                        "/api/route",
+                        "/api/route/**",
+                        "/logout.html").permitAll()
+                );
+                /* 
+                .headers(
+                        headers -> headers.frameOptions(
+                                frameOptions -> frameOptions.mode(XFrameOptionsServerHttpHeadersWriter.Mode.SAMEORIGIN)
+                        )
+                );
+                */
+                //.csrf(csrf -> csrf.disable())
+                //.authorizeExchange(authorize -> authorize.anyExchange().authenticated());
+        return http.build();
+    }
+}

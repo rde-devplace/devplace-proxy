@@ -1,0 +1,86 @@
+server:
+  port: 8080
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.cloud.gateway.filter.LoggingGlobalFilter: TRACE
+    org.springframework.http.server.reactive: TRACE
+    org.springframework.http.server.web: TRACE
+    org.springframework.web.reactive: TRACE
+    reactive.netty: TRACE
+
+
+spring:
+  profiles:
+    active: local
+  application:
+    name: kube-proxy-gateway
+  jpa:
+    open-in-view: true
+    generate-ddl: true
+    show-sql: false
+    hibernate:
+      #ddl-auto: create
+      ddl-auto: update
+      #ddl-auto: create-drop
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        #physical-strategy: cnadata.outbox.util.DBLowerCaseNamingStrategy
+        #physical-strategy: cnadata.outbox.util.DBUpperCaseNamingStrategy
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+  datasource:
+    url: jdbc:mariadb://database-1.c7vhecmevmrc.ap-northeast-2.rds.amazonaws.com/mydevdb?allowMultiQueries=true
+    username: admin
+    password: ywyi1004
+    driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      idle-timeout: 300
+      max-lifetime: 300
+      maximum-pool-size: 20
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  security:
+    oauth2:
+      resourceserver:
+        opaquetoken:
+          introspection-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev/protocol/openid-connect/token/introspect
+          client-id: ide-proxy-rs
+          client-secret: aQBocnHLDRZSGFB1iRc0EvMARywpVV5u
+
+---
+server:
+  port: 8080
+  logging:
+    level: INFO
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      idle-timeout: 300
+      max-lifetime: 300
+      maximum-pool-size: 20
+
+
+  security:
+    oauth2:
+      resourceserver:
+        opaquetoken:
+          introspection-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev/protocol/openid-connect/token/introspect
+          client-id: ide-proxy-rs
+          client-secret: aQBocnHLDRZSGFB1iRc0EvMARywpVV5u
+          authorization-grant-type: client_credentials
