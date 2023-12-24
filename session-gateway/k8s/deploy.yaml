@@ -13,7 +13,7 @@ spec:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8081'
         prometheus.io/path: '/actuator/prometheus'
-        update: 4caad4e0146c2c6c8c21ccda42be6154
+        update: 1446426405cfa83f735f9484a6cfe508
       labels:
         app: kube-proxy
     spec:
@@ -26,6 +26,8 @@ spec:
         ports:
         - containerPort: 8080
         env:
+        - name: LOGGING_LEVEL
+          value: DEBUG
         - name: DATASOURCE_URL
           valueFrom:
             secretKeyRef:

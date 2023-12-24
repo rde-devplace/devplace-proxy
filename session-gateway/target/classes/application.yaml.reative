@@ -33,28 +33,14 @@ spring:
   config:
     activate:
       on-profile: local
-  jpa:
-    open-in-view: true
-    generate-ddl: true
-    show-sql: false
-    hibernate:
-      #ddl-auto: create
-      ddl-auto: update
-      #ddl-auto: create-drop
-      naming:
-        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
-        #physical-strategy: cnadata.outbox.util.DBLowerCaseNamingStrategy
-        #physical-strategy: cnadata.outbox.util.DBUpperCaseNamingStrategy
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-  datasource:
+  r2dbc:
     url: jdbc:mariadb://database-1.c7vhecmevmrc.ap-northeast-2.rds.amazonaws.com/mydevdb?allowMultiQueries=true
     username: admin
     password: ywyi1004
-    driver-class-name: org.mariadb.jdbc.Driver
-    hikari:
-      idle-timeout: 300
-      max-lifetime: 300
-      maximum-pool-size: 20
+  sql:
+    init:
+      schema-locations: classpath:sql/schema.sql
+      data-locations: classpath:sql/data.sql
   cloud:
     gateway:
       httpclient:
@@ -71,10 +57,6 @@ spring:
     password: admin
   security:
     oauth2:
-      resourceserver:
-        jwt:
-          jwt-set-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev/protocol/openid-connect/certs
-          issuer-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev
       client:
         provider:
           keycloak:
@@ -84,45 +66,27 @@ spring:
             provider: keycloak
             client-id: kube-proxy-renew
             client-secret: B3x4C4DARIYPVemmXghmxZZdFGhfofWN
-            # implicit를 사용하는 경우 keycloak의 client 설정에서 Implicit Flow Enabled를 ON으로 설정해야 한다.
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             scope:
               - profile
               - email
+              - groups
 
 ---
 server:
   port: 8080
   logging:
-    level: ${LOGGING_LEVEL}
+    level: DEBUG
 
 spring:
   config:
     activate:
       on-profile: prod
-  jpa:
-    open-in-view: true
-    generate-ddl: true
-    show-sql: false
-    hibernate:
-      #ddl-auto: create
-      ddl-auto: update
-      #ddl-auto: create-drop
-      naming:
-        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
-        #physical-strategy: cnadata.outbox.util.DBLowerCaseNamingStrategy
-        #physical-strategy: cnadata.outbox.util.DBUpperCaseNamingStrategy
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-  datasource:
+  r2dbc:
     url: ${DATASOURCE_URL}
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
-    driver-class-name: org.mariadb.jdbc.Driver
-    hikari:
-      idle-timeout: 300
-      max-lifetime: 300
-      maximum-pool-size: 20
   cloud:
     gateway:
       httpclient:
@@ -139,10 +103,6 @@ spring:
     password: admin
   security:
     oauth2:
-      resourceserver:
-        jwt:
-          jwt-set-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev/protocol/openid-connect/certs
-          issuer-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev
       client:
         provider:
           keycloak:

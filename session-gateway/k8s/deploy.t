@@ -26,6 +26,8 @@ spec:
         ports:
         - containerPort: 8080
         env:
+        - name: LOGGING_LEVEL
+          value: ${LOGGING_LEVEL}
         - name: DATASOURCE_URL
           valueFrom:
             secretKeyRef:

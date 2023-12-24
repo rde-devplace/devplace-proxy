@@ -33,6 +33,7 @@ public class ProxyRouterService {
         return proxyRouterRepository.findAll();
     }
 
+    @Transactional
     public ProxyRouter save(ProxyRouter proxyRouter) {
         return proxyRouterRepository.save(proxyRouter);
     }

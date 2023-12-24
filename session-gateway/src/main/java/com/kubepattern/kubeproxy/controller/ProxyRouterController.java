@@ -44,12 +44,12 @@ public class ProxyRouterController {
      */
     @PostMapping("/api/route")
     public ProxyRouter addRouter(@RequestBody ProxyRouter proxyRouter) {
-      ProxyRouter savedRouter = proxyRouterService.save(proxyRouter);
+        ProxyRouter savedRouter = proxyRouterService.save(proxyRouter);
         getRouterList();
         return savedRouter;
     }
 
-    @PostMapping("/api/vscode/route/{name}")
+    @PostMapping("/api/route/vscode/{name}")
     public List<ProxyRouter> addVscodeRouter(@PathVariable String name, @RequestBody List<String> portList) {
 
         List<ProxyRouter> proxyRouterList = ideConfigService.addIdeRoute(name, portList);
@@ -66,9 +66,9 @@ public class ProxyRouterController {
 
 
 
-    @DeleteMapping("/api/route/user/{userName}")
-    public ResponseEntity<Void> deleteRouterByUserName(@PathVariable String userName) {
-        proxyRouterService.deleteByUserName(userName);
+    @DeleteMapping("/api/route/vscode/{name}")
+    public ResponseEntity<Void> deleteRouterByUserName(@PathVariable String name) {
+        proxyRouterService.deleteByUserName(name);
         getRouterList();
         return ResponseEntity.noContent().build();
     }
