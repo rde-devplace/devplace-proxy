@@ -4,22 +4,19 @@
 KEYCLOAK_URI="https://console-dev.amdp-dev.cloudzcp.io/iam"
 CLIENT_ID="kube-proxy-renew"
 CLIENT_SECRET="B3x4C4DARIYPVemmXghmxZZdFGhfofWN"
+USERNAME="himang10"
+PASSWORD="ywyi1004"
 PROXY_URI="https://kube-proxy-rs.amdp-dev.skamdp.org"
 #PROXY_URI=localhost:8080
 
-# 기본 USERNAME과 PASSWORD 설정
-DEFAULT_USERNAME="himang10"
-DEFAULT_PASSWORD="ywyi1004"
-
-# 인자로 주어진 값 확인 및 입력 파라메터 받기
-if [ "$#" -lt 1 ]; then
-    echo "Usage: $0 <path> [username] [password]"
-    echo "Example: $0 quotes/BAEL [optional_username] [optional_password]"
+# 인자로 주어진 값 확인
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <path>"
+    echo "Example: $0 quotes/BAEL"
     exit 1
 fi
 RESOURCE_PATH="$1"
-USERNAME="${2:-$DEFAULT_USERNAME}"
-PASSWORD="${3:-$DEFAULT_PASSWORD}"
+
 
 # 토큰 가져오기
 TOKEN_RESPONSE=$(curl -s -L -X POST \
@@ -45,7 +42,7 @@ if [ -z "$ACCESS_TOKEN" ]; then
     exit 1
 fi
 
-echo "Using username: $USERNAME"
+echo
 echo
 echo "--------------------------"
 echo "result: "
@@ -55,4 +52,5 @@ curl --insecure --location --request GET "$PROXY_URI$RESOURCE_PATH" \
 --header "Authorization: Bearer $ACCESS_TOKEN"
 echo
 echo "--------------------------"
+
 

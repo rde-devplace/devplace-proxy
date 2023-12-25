@@ -4,10 +4,16 @@
 KEYCLOAK_URI="https://console-dev.amdp-dev.cloudzcp.io/iam"
 CLIENT_ID="kube-proxy-renew"
 CLIENT_SECRET="B3x4C4DARIYPVemmXghmxZZdFGhfofWN"
-USERNAME="himang10"
-PASSWORD="ywyi1004"
-PROXY_URI="http://kube-proxy.amdp-dev.skamdp.org
+PROXY_URI="http://kube-proxy.amdp-dev.skamdp.org"
 
+# 기본 USERNAME과 PASSWORD 설정
+DEFAULT_USERNAME="himang10"
+DEFAULT_PASSWORD="ywyi1004"
+
+USERNAME="${1:-$DEFAULT_USERNAME}"
+PASSWORD="${2:-$DEFAULT_PASSWORD}"
+
+echo "user-name = $USERNAME"
 
 # 토큰 가져오기
 TOKEN_RESPONSE=$(curl -s -L -X POST \
