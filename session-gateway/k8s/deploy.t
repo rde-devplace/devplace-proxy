@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ${IMAGE_NAME}-deployment
+  namespace: ${NAMESPACE}
 spec:
   replicas: 1
   selector:
