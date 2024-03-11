@@ -16,19 +16,23 @@ public class IdeConfigService {
         // 기본 경로와 URI 값
         List<String> paths = new ArrayList<>(Arrays.asList(
                 "/" + name + "/vscode/**",
-                "/" + name + "/cli/**"
+                "/" + name + "/cli/**",
+                "/" + name + "/jupyter/**"
         ));
         List<String> uris = new ArrayList<>(Arrays.asList(
                 "http://" + name + "-vscode-server-service." + namespaceName + ":8443",
-                "http://" + name + "-vscode-server-service." + namespaceName + ":3000"
+                "http://" + name + "-vscode-server-service." + namespaceName + ":3000",
+                "http://" + name + "-vscode-server-service." + namespaceName + ":3333"
                 //"http://" + name + "-vscode-server-service:8443",
                 //"http://" + name + "-vscode-server-service:3000"
         ));
         List<String> patterns = new ArrayList<>(Arrays.asList(
                 "/" + name + "/(?<segment>.*)",
+                "/(?<segment>.*)",
                 "/(?<segment>.*)"
         ));
         List<String> replacements = new ArrayList<>(Arrays.asList(
+                "/${segment}",
                 "/${segment}",
                 "/${segment}"
         ));

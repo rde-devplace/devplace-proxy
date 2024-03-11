@@ -8,8 +8,8 @@ metadata:
     nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, DELETE, PATCH, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-Frame-Options"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
-  name: kube-proxy-rs-ingress
-  namespace: part-rde
+  name: ${IMAGE_NAME}-ingress
+  namespace: ${NAMESPACE}
 spec:
   rules:
   - host: kube-proxy-rs.amdp-dev.skamdp.org

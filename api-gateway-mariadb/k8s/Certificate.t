@@ -2,7 +2,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: ${IMAGE_NAME}-tls-cert
-  namespace: kube-pattern
+  namespace: ${NAMESPACE}
 spec:
   secretName: ${IMAGE_NAME}-tls-cert
   secretTemplate:

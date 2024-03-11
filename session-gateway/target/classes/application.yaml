@@ -49,7 +49,7 @@ spring:
   datasource:
     url: jdbc:mariadb://database-1.c7vhecmevmrc.ap-northeast-2.rds.amazonaws.com/mydevdb?allowMultiQueries=true
     username: admin
-    password: ywyi1004
+    password: ${DATASOURCE_PASSWORD}
     driver-class-name: org.mariadb.jdbc.Driver
     hikari:
       idle-timeout: 300
@@ -73,12 +73,12 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwt-set-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev/protocol/openid-connect/certs
-          issuer-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev
+          jwt-set-uri: https://console-dev.skamdp.org/iam/realms/amdp-dev/protocol/openid-connect/certs
+          issuer-uri: https://console-dev.skamdp.org/iam/realms/amdp-dev
       client:
         provider:
           keycloak:
-            issuer-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev
+            issuer-uri: https://console-dev.skamdp.org/iam/realms/amdp-dev
         registration:
           kube-proxy-renew:
             provider: keycloak
@@ -141,12 +141,12 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwt-set-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev/protocol/openid-connect/certs
-          issuer-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev
+          jwt-set-uri: https://console-dev.skamdp.org/iam/realms/amdp-dev/protocol/openid-connect/certs
+          issuer-uri: https://console-dev.skamdp.org/iam/realms/amdp-dev
       client:
         provider:
           keycloak:
-            issuer-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev
+            issuer-uri: https://console-dev.skamdp.org/iam/realms/amdp-dev
         registration:
           kube-proxy-renew:
             provider: keycloak

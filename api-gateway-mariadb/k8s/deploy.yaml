@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kube-proxy-rs-deployment
+  namespace: part-rde
 spec:
   replicas: 1
   selector:
@@ -13,7 +14,7 @@ spec:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8081'
         prometheus.io/path: '/actuator/prometheus'
-        update: d156c439bdaa8494fad7d77733fce8f2
+        update: 60fdf1d2989a7f29f14f553edc92a4c3
       labels:
         app: kube-proxy-rs
     spec:

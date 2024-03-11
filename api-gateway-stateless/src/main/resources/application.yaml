@@ -50,7 +50,7 @@ spring:
     oauth2:
       resourceserver:
         opaquetoken:
-          introspection-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev/protocol/openid-connect/token/introspect
+          introspection-uri: https://console-dev.skamdp.org/iam/realms/amdp-dev/protocol/openid-connect/token/introspect
           client-id: ide-proxy-rs
           client-secret: aQBocnHLDRZSGFB1iRc0EvMARywpVV5u
 
@@ -80,7 +80,7 @@ spring:
     oauth2:
       resourceserver:
         opaquetoken:
-          introspection-uri: https://console-dev.amdp-dev.cloudzcp.io/iam/realms/amdp-dev/protocol/openid-connect/token/introspect
+          introspection-uri: https://console-dev.skamdp.org/iam/realms/amdp-dev/protocol/openid-connect/token/introspect
           client-id: ide-proxy-rs
           client-secret: aQBocnHLDRZSGFB1iRc0EvMARywpVV5u
           authorization-grant-type: client_credentials

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 환경 변수에서 값 가져오기
-KEYCLOAK_URI="https://console-dev.amdp-dev.cloudzcp.io/iam"
+KEYCLOAK_URI="https://console-dev.skamdp.org/iam"
 CLIENT_ID="kube-proxy-renew"
 CLIENT_SECRET="B3x4C4DARIYPVemmXghmxZZdFGhfofWN"
 PROXY_URI="http://kube-proxy.amdp-dev.skamdp.org"
