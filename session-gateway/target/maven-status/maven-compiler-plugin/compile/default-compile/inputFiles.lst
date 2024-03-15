@@ -11,6 +11,7 @@
 /Users/himang10/mydev/digital-devplace/devplace-proxy/session-gateway/src/main/java/com/kubepattern/kubeproxy/model/Authority.java
 /Users/himang10/mydev/digital-devplace/devplace-proxy/session-gateway/src/main/java/com/kubepattern/kubeproxy/model/OAuth2AuthenticationDetails.java
 /Users/himang10/mydev/digital-devplace/devplace-proxy/session-gateway/src/main/java/com/kubepattern/kubeproxy/model/ProxyRouter.java
+/Users/himang10/mydev/digital-devplace/devplace-proxy/session-gateway/src/main/java/com/kubepattern/kubeproxy/util/SVCPathGenerator.java
 /Users/himang10/mydev/digital-devplace/devplace-proxy/session-gateway/src/main/java/com/kubepattern/kubeproxy/filters/AuthenticationFilter.java
 /Users/himang10/mydev/digital-devplace/devplace-proxy/session-gateway/src/main/java/com/kubepattern/kubeproxy/config/OAuth2LoginWebFluxSecurityConfig.java
 /Users/himang10/mydev/digital-devplace/devplace-proxy/session-gateway/src/main/java/com/kubepattern/kubeproxy/config/GatewayConfig.java

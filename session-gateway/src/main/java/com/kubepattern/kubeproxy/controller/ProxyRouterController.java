@@ -50,9 +50,14 @@ public class ProxyRouterController {
     }
 
     @PostMapping("/api/route/vscode")
-    public List<ProxyRouter> addVscodeRouter(@RequestParam String namespace, @RequestParam String name, @RequestBody List<String> portList) {
+    public List<ProxyRouter> addVscodeRouter(
+            @RequestParam String namespace,
+            @RequestParam String name,
+            @RequestParam(required = false, defaultValue = "")  String wsName,
+            @RequestParam(required = false, defaultValue = "")  String appName,
+            @RequestBody List<String> portList) {
 
-        List<ProxyRouter> proxyRouterList = ideConfigService.addIdeRoute(namespace, name, portList);
+        List<ProxyRouter> proxyRouterList = ideConfigService.addIdeRoute(namespace, name, wsName, appName, portList);
 
         List<ProxyRouter> savedRouterList = new ArrayList<>();
         for (ProxyRouter proxyRouter : proxyRouterList) {
