@@ -75,13 +75,16 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                     String path = exchange.getRequest().getURI().getRawPath();
 
                     if(!name.equals("admin") && !name.equals("administrator")) {
-                        String patternString = String.format("/(%s)/((vscode|cli|proxy|jupyter|tensorflow)(/|$))", name);
+                        String patternString = String.format("/(%s)/.*/(vscode|cli|proxy|jupyter|tensorflow)(/|$)", name);
+
                         Pattern pattern = Pattern.compile(patternString);
                         // Pattern pattern = Pattern.compile("/([^/]+)/(vscode|cli|proxy|jupyter)(/|$)");
                         Matcher matcher = pattern.matcher(path);
                         if (matcher.find()) {
                             String userName = matcher.group(1);
+                            log.info("userName: {}", userName);
                             if (!userName.equals(name)) {
+                                log.info("Forbidden: {}", path);
                                 exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
                                 return exchange.getResponse().setComplete();
                             }
