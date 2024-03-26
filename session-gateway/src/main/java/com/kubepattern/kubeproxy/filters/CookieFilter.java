@@ -27,6 +27,7 @@ public class CookieFilter implements WebFilter, Ordered {
             HttpHeaders headers = exchange.getResponse().getHeaders();
             List<String> originalCookies = headers.get(HttpHeaders.SET_COOKIE);
 
+            /*
             if (originalCookies != null) {
                 List<String> modifiedCookies = originalCookies.stream()
                         .map(cookie -> cookie.startsWith("SESSION") ?
@@ -35,6 +36,7 @@ public class CookieFilter implements WebFilter, Ordered {
                         .collect(Collectors.toList());
                 headers.put(HttpHeaders.SET_COOKIE, modifiedCookies);
             }
+             */
 
             // Location 헤더 변경
             if (headers.getLocation() != null && headers.getLocation().getPath().equals("/login?error")) {

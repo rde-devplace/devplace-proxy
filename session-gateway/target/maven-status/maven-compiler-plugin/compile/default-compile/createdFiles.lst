@@ -11,7 +11,9 @@ com/kubepattern/kubeproxy/controller/ProxyRouterController.class
 com/kubepattern/kubeproxy/filters/CustomReactiveAuthenticationSuccessHandler.class
 com/kubepattern/kubeproxy/config/GatewayConfig.class
 com/kubepattern/kubeproxy/service/ProxyRouterService.class
+com/kubepattern/kubeproxy/util/ExchangeHandler.class
 com/kubepattern/kubeproxy/service/IdeConfigService.class
+com/kubepattern/kubeproxy/util/SubdomainEncodingUtil.class
 com/kubepattern/kubeproxy/repo/JdbcSecurityContextRepository.class
 com/kubepattern/kubeproxy/model/OAuth2UserDetails.class
 com/kubepattern/kubeproxy/filters/CookieFilter.class

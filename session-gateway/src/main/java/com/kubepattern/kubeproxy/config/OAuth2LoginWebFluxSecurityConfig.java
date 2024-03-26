@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2Clien
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 
@@ -51,6 +52,7 @@ public class OAuth2LoginWebFluxSecurityConfig {
         return NimbusReactiveJwtDecoder.withJwkSetUri(jwkSetUri).build();
     }
 
+
     @Bean
     ServerSecurityContextRepository jdbcSecurityContextRepository() {
         return new JdbcSecurityContextRepository(customSecurityContextRepository);
@@ -59,8 +61,9 @@ public class OAuth2LoginWebFluxSecurityConfig {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, OAuth2ClientProperties oAuth2ClientProperties) {
         HeaderWriterServerLogoutHandler handler = new HeaderWriterServerLogoutHandler(
                 new ClearSiteDataServerHttpHeadersWriter(
-                        ClearSiteDataServerHttpHeadersWriter.Directive.CACHE
-                        //ClearSiteDataServerHttpHeadersWriter.Directive.EXECUTION_CONTEXTS
+                        ClearSiteDataServerHttpHeadersWriter.Directive.COOKIES,
+                        ClearSiteDataServerHttpHeadersWriter.Directive.STORAGE,
+                        ClearSiteDataServerHttpHeadersWriter.Directive.EXECUTION_CONTEXTS
                 )
         );
         KeycloakServerLogoutHandler keycloakServerLogoutHandler = new KeycloakServerLogoutHandler(handler, customSecurityContextRepository);
@@ -91,13 +94,28 @@ public class OAuth2LoginWebFluxSecurityConfig {
                 .authorizeExchange(authorize -> authorize.anyExchange().authenticated())
                 .logout(logout -> logout
                                 .logoutHandler(keycloakServerLogoutHandler)
-                                .logoutSuccessHandler(logoutSuccessHandler())
+                                //.logoutUrl(this.issuerUri + "/protocol/openid-connect/logout?redirect_uri=https://kube-proxy.amdp-dev.skamdp.org/list")
+                                .logoutSuccessHandler((message, authentication) -> {
+                                    String sessionId = message.getExchange().getRequest().getCookies().getFirst("SESSION").getValue();
+                                    if(sessionId !=null)
+                                        customSecurityContextRepository.findById(sessionId);
+                                    message.getExchange().getResponse().setStatusCode(HttpStatus.OK);
+                                    String uri = this.issuerUri + "/protocol/openid-connect/logout?redirect_uri=https://kube-proxy.amdp-dev.skamdp.org/list";
+
+                                    RedirectServerLogoutSuccessHandler successHandler = new RedirectServerLogoutSuccessHandler();
+                                    successHandler.setLogoutSuccessUrl(URI.create(uri));
+
+                                    log.info("logoutSuccessHandler sessionId: {}", sessionId);
+                                    return logoutSuccessHandler().onLogoutSuccess(message, authentication);
+                                    //return handler.logout(message, authentication);
+                                })
+                                //.logoutSuccessHandler(logoutSuccessHandler())
                 );
 
 
         // Custom Security Context 처리를 추가한다.
         http.securityContextRepository(jdbcSecurityContextRepository());
-                                //.logoutSuccessHandler(handler));
+
         return http.build();
     }
 

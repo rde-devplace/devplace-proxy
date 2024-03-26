@@ -1,0 +1,88 @@
+package com.kubepattern.kubeproxy.filters;
+
+
+import com.kubepattern.kubeproxy.util.ExchangeHandler;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.core.Ordered;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.server.context.ServerSecurityContextRepository;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+@Slf4j
+@Component
+public class SubDomainFilter implements GlobalFilter, Ordered {
+    private final TokenResponseUtil tokenResponseUtil;
+    private static final Pattern HOST_PATTERN =
+            Pattern.compile("^(.+?)-([0-9]+)\\.kube-proxy\\.amdp-dev\\.skamdp\\.org$");
+    private static final Pattern SUBDOMAIN_PATTERN =
+            Pattern.compile("^([^-]+)");
+
+
+
+    public SubDomainFilter(TokenResponseUtil tokenResponseUtil) {
+        this.tokenResponseUtil = tokenResponseUtil;
+    }
+
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+
+        Mono<SecurityContext> securityContextMono = exchange.getPrincipal()
+                .flatMap(principal -> {
+                    if (principal instanceof Authentication) {
+                        SecurityContextHolder.getContext().setAuthentication((Authentication) principal);
+                    }
+                    return Mono.justOrEmpty(SecurityContextHolder.getContext());
+                });
+
+
+        return securityContextMono
+                .filter(securityContext -> securityContext.getAuthentication() != null)
+                .map(securityContext -> {
+                    return (OAuth2User) securityContext.getAuthentication().getPrincipal();
+                })
+                .flatMap(oAuth2User -> {
+                    String name = oAuth2User.getAttribute("preferred_username");
+                    String host = exchange.getRequest().getURI().getHost();
+
+                    Matcher matcher = HOST_PATTERN.matcher(host);
+                    //log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ host: {} matcher={}", host, matcher);
+                    if(matcher!=null && matcher.matches()) {
+                        // himang10-8080.kube-proxy.amdp-dev.skamdp.org 형태의 host에서 himanag10을 추출
+                        //log.info("##################################### matcher.group()={} group(1)={}end", matcher.group(), matcher.group(1));
+                        String firstName = matcher.group(1);
+                        //log.info("##################################### firstName={}end", firstName);
+                        Matcher subDomainMatcher = SUBDOMAIN_PATTERN.matcher(firstName);
+                        //log.info("##################################### subDomainMatcher={}end", subDomainMatcher);
+                        String sdUser = subDomainMatcher.find()? subDomainMatcher.group(1): "none";
+                        log.info("############## matched host: {} sdUser={} name={}", host, sdUser, name);
+                        if (sdUser != null && !name.equals(sdUser)) {
+                            log.info("Forbidden: host: {} userName: {}", host, name);
+                            exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+                            return exchange.getResponse().setComplete();
+                        }
+                    }
+
+
+
+                    return chain.filter(exchange);
+                });
+    }
+
+
+    @Override
+    public int getOrder() {
+        return -9999; // 필터 순서를 높게 설정하여 가장 먼저 실행되도록 합니다.
+    }
+}
+

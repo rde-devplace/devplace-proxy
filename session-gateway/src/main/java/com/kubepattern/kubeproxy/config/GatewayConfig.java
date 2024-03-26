@@ -1,8 +1,8 @@
 package com.kubepattern.kubeproxy.config;
 
-import com.kubepattern.kubeproxy.model.ProxyRouter;
 import com.kubepattern.kubeproxy.service.ProxyRouterService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.kubepattern.kubeproxy.util.ExchangeHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.gateway.filter.FilterDefinition;
 import org.springframework.cloud.gateway.filter.factory.RewritePathGatewayFilterFactory;
@@ -12,8 +12,6 @@ import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import reactor.core.publisher.Flux;
 
 import java.net.URI;
@@ -25,12 +23,22 @@ import static org.springframework.cloud.gateway.filter.factory.RewriteResponseHe
 import static org.springframework.cloud.gateway.filter.factory.RewriteResponseHeaderGatewayFilterFactory.REPLACEMENT_KEY;
 import static org.springframework.cloud.gateway.support.NameUtils.normalizeFilterFactoryName;
 
+@Slf4j
 @Configuration
 @RefreshScope
 public class GatewayConfig {
 
-    @Autowired
-    private ProxyRouterService proxyRouterService;
+    private final ProxyRouterService proxyRouterService;
+
+    // private final TokenResponseUtil tokenResponseUtil;
+    //private final SubDomainGatewayFilter subDomainGatewayFilter;
+
+    private final String domainUrl = "kube-proxy.amdp-dev.skamdp.org";
+
+    public GatewayConfig(ProxyRouterService proxyRouterService, ExchangeHandler exchangeHandler) {
+        this.proxyRouterService = proxyRouterService;
+        //this.tokenResponseUtil = tokenResponseUtil;
+    }
 
     @Bean
     public RouteDefinitionLocator customRouteDefinitionLocator() {
@@ -80,4 +88,63 @@ public class GatewayConfig {
             }).collect(Collectors.toList())
         );
     }
+
+
+        /*
+    @Bean
+    public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
+        final String[] destinationUri = {"https://"};
+        return builder.routes()
+                .route(r -> r
+                        .host("*." + domainUrl)
+                        .and()
+                        .path("/**")
+                        .filters(f -> f.filter(new GatewayFilter() {
+                            @Override
+                            public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+                                String host = exchange.getRequest().getURI().getHost();
+                                String idName = TokenResponseUtil.getFieldFromHost(host, 1);
+                                String servicePrefix = TokenResponseUtil.getFieldFromHost(host, 3);
+                                String portNumber = TokenResponseUtil.getFieldFromHost(host, 2);
+
+                                destinationUri[0] = destinationUri[0] + servicePrefix + "-rde-service:" + portNumber;
+
+                                log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$ Request URI: {} idName={} portNumber={}", exchange.getRequest().getURI(), idName, portNumber);
+                                // 동적으로 결정된 URI로 exchange의 요청 URI 변경
+
+                                // 수정된 exchange 객체로 필터 체인 계속
+                                return chain.filter(exchange);
+                            }
+
+                        }))
+                        .uri(destinationUri[0]))
+                .build();
+    }
+
+         */
+
+    /*
+
+    @Bean
+    public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
+        AtomicReference<String> destinationUri = new AtomicReference<>("");
+        return builder.routes()
+                .route("dynamic_route", r -> r
+                        .host("*." + domainUrl)
+                        .and().path("/**")
+                        .filters(f -> f.filter((exchange, chain) -> {
+                            String host = exchange.getRequest().getURI().getHost();
+                            String idName = TokenResponseUtil.getFieldFromHost(host, 1);
+                            String servicePrefix = TokenResponseUtil.getFieldFromHost(host, 3);
+                            String portNumber = TokenResponseUtil.getFieldFromHost(host, 2);
+
+                            //log.info("####################### Request URI: {} idName={} portNumber={}", exchange.getRequest().getURI(), idName, portNumber);
+                            //destinationUri.set("http://" + servicePrefix + "-" + portNumber);
+                            return chain.filter(exchange);
+
+                        }))
+                        .uri("http://localhost:8080")
+                        .build();
+    } */
+
 }

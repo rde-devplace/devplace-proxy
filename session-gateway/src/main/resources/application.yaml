@@ -39,8 +39,8 @@ spring:
     show-sql: false
     hibernate:
       #ddl-auto: create
-      ddl-auto: update
-      #ddl-auto: create-drop
+      #ddl-auto: update
+      ddl-auto: create-drop
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
         #physical-strategy: cnadata.outbox.util.DBLowerCaseNamingStrategy
@@ -60,15 +60,6 @@ spring:
       httpclient:
         websocket:
           max-frame-payload-length: 10000000
-    bus:
-      enabled: true
-      refresh:
-        enabled: true
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: admin
-    password: admin
   security:
     oauth2:
       resourceserver:
@@ -125,18 +116,14 @@ spring:
       maximum-pool-size: 20
   cloud:
     gateway:
+      routes:
+        - id: fontend
+          uri: http://frontend-ide-service.part-rde:8080
+          predicates:
+            - Path=/console/**
       httpclient:
         websocket:
           max-frame-payload-length: 10000000
-    bus:
-      enabled: true
-      refresh:
-        enabled: true
-  rabbitmq:
-    host: my-rabbitmq.devdb.svc.cluster.local
-    port: 5672
-    username: admin
-    password: admin
   security:
     oauth2:
       resourceserver:

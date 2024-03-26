@@ -22,12 +22,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class JdbcSecurityContextRepository implements ServerSecurityContextRepository {
+public class JdbcSecurityContextRepositoryOrigin implements ServerSecurityContextRepository {
 
     private final CustomSecurityContextRepository customSecurityContextRepository;
     private final Gson gson;
 
-    public JdbcSecurityContextRepository(CustomSecurityContextRepository customSecurityContextRepository) {
+    public JdbcSecurityContextRepositoryOrigin(CustomSecurityContextRepository customSecurityContextRepository) {
         this.customSecurityContextRepository = customSecurityContextRepository;
         this.gson = new Gson();
     }
@@ -36,7 +36,12 @@ public class JdbcSecurityContextRepository implements ServerSecurityContextRepos
     public Mono<Void> save(ServerWebExchange exchange, SecurityContext context) {
         String header = exchange.getRequest().getHeaders().toString();
         log.info("JdbcSecurityContextRepository.save - header : {}" + header);
-        Optional<String> sessionId = JdbcSecurityContextRepository.extractSessionId(exchange, "SESSION");
+        Optional<String> sessionId = JdbcSecurityContextRepositoryOrigin.extractSessionId(exchange, "SESSION");
+        // HttpHeaders headers = exchange.getResponse().getHeaders();
+
+        // headers.add("Set-Cookie", "KC_SESSION=" + context.getAuthentication() + "; Path=/; Domain=kube-proxy.amdp-dev.skamdp.org; HttpOnly; Secure; SameSite=None");
+        // log.info("context.getAuthentication - KC_SESSION : {}", context.getAuthentication());
+
 
         if (sessionId.isEmpty()) {
             log.info("JdbcSecurityContextRepository.save - sessionId is null");
@@ -60,7 +65,7 @@ public class JdbcSecurityContextRepository implements ServerSecurityContextRepos
         String header = exchange.getRequest().getHeaders().toString();
         log.info("JdbcSecurityContextRepository.load -header : {}", header);
         //String sessionId = extractSessionId(exchange.getRequest().getHeaders().getFirst("Cookie"));
-        Optional<String> sessionId = JdbcSecurityContextRepository.extractSessionId(exchange, "SESSION");
+        Optional<String> sessionId = JdbcSecurityContextRepositoryOrigin.extractSessionId(exchange, "SESSION");
         if(sessionId.isEmpty()) {
             log.info("JdbcSecurityContextRepository.load - sessionId is null");
             return exchange.getPrincipal().flatMap(principal -> {
@@ -73,10 +78,9 @@ public class JdbcSecurityContextRepository implements ServerSecurityContextRepos
             });
         } else {
             return Mono.defer(() -> {
-                log.info("JdbcSecurityContextRepository.load - sessionId : {}", sessionId.get());
+                log.info("JdbcSecurityContextRepository.load - sessionId : {}", sessionId);
                 Optional<SecurityContextEntity> optionalEntity = customSecurityContextRepository.findById(sessionId.get()); // 블로킹 호출
                 if (optionalEntity.isPresent()) {
-                    log.info("JdbcSecurityContextRepository.load - optionalEntity is {}", optionalEntity.get());
                     SecurityContextEntity entity = optionalEntity.get();
                     String authentication = entity.getAuthentication();
                     OAuth2AuthenticationDetails authDetails = gson.fromJson(authentication, OAuth2AuthenticationDetails.class);

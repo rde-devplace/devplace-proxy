@@ -9,7 +9,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Data
-@Table(name = "proxy_router", indexes = @Index(name = "idx_username", columnList = "userName"))
+@Table(name = "proxy_router_1", indexes = @Index(name = "idx_username", columnList = "userName"))
 public class ProxyRouter {
 
     @Id

@@ -1,13 +1,12 @@
 package com.kubepattern.kubeproxy.filters;
 
 
+import com.kubepattern.kubeproxy.util.ExchangeHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 
-import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -19,7 +18,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 
-import java.util.Optional;
+import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,16 +27,27 @@ import java.util.regex.Pattern;
 public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     private final ServerSecurityContextRepository serverSecurityContextRepository;
+    private final ExchangeHandler exchangeHandler;
+    private final String domainUrl = "kube-proxy.amdp-dev.skamdp.org";
 
-    public AuthenticationFilter(ServerSecurityContextRepository serverSecurityContextRepository) {
+
+    public AuthenticationFilter(ServerSecurityContextRepository serverSecurityContextRepository,
+                                ExchangeHandler exchangeHandler) {
         this.serverSecurityContextRepository = serverSecurityContextRepository;
+        this.exchangeHandler = exchangeHandler;
     }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        HttpHeaders headers = exchange.getRequest().getHeaders();
-        // headers.remove("P3P");
 
+        log.info("######################## AuthenticationFilter filter() host: {} path: {} uri: {}",
+                exchange.getRequest().getHeaders().getHost(), exchange.getRequest().getPath(), exchange.getRequest().getURI());
+
+        String sessionId = exchange.getRequest().getCookies().getFirst("SESSION").getValue();
+        if(sessionId != null) {
+            String sessionString = "SESSION=" + exchangeHandler.extractSessionId(exchange, "SESSION").get() + "; Path=/; Domain=" + this.domainUrl + "; Secure; SameSite=None";
+            exchange.getResponse().getHeaders().add("Set-Cookie", sessionString);
+        }
         Mono<SecurityContext> sercurityContextMono = exchange.getPrincipal()
                 .flatMap(principal -> {
                     if (principal instanceof Authentication) {
@@ -48,30 +58,33 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
 
         return sercurityContextMono
-                //.filter(securityContext -> securityContext.getAuthentication() != null && securityContext.getAuthentication().getPrincipal() instanceof OAuth2User)
-                //.map(securityContext -> (OAuth2User) securityContext.getAuthentication().getPrincipal())
                 .filter(securityContext -> securityContext.getAuthentication() != null)
                 .map(securityContext -> {
-                    // header에 path /login/oauth2/code/kube-proxy-renew? 가 있는지를 확인해서 있으면
-                    // securityContextRepository.save(exchange, securityContext)를 호출한다.
-                    // 성공적으로 로그인 했을 때 session 정볼르 등록
-                    /*
-                    Optional<String> path = Optional.ofNullable(exchange.getRequest().getURI().getPath());
-                    //Optional<String> location = Optional.ofNullable(exchange.getResponse().getHeaders().getFirst("Location"));
-                    log.info("--------------- filter - location: {}", path);
-                    if(path.isPresent()) {
-                        if (path.get().contains("/oauth2/authorization/")) {
-                            log.info("--------------- include serverSecurityContextRepository.save - location: {}", path);
-                            serverSecurityContextRepository.save(exchange, securityContext);
-                        }
-                    }
-                     */
+                    // SessionId를 추출하여 SESSION 쿠키를 추가 합니다.
+                    // String sessionString = "SESSION=" + tokenResponseUtil.extractSessionId(exchange, "SESSION").get() + "; Path=/; Domain=" + this.domainUrl + "; Secure; SameSite=None";
+                    // exchange.getResponse().getHeaders().add("Set-Cookie", sessionString);
+
+                    this.exchangeHandler.addTokenToResponse(exchange, securityContext)
+                            .subscribe(token -> {
+                                //log.info("###### token: {}", token);
+                                String cookieString = "access_token=" + token + "; Path=/; Domain=" + this.domainUrl + "; Secure; SameSite=None";
+                                //exchange.getResponse().getHeaders().setBearerAuth(token);
+                                exchange.getResponse().getHeaders().add("Set-Cookie", cookieString);
+
+                            });
                     return (OAuth2User) securityContext.getAuthentication().getPrincipal();
                 })
                 .flatMap(oAuth2User -> {
                     String name = oAuth2User.getAttribute("preferred_username");
+                    // String forUserName = tokenResponseUtil.extractSubdomain(exchange);
+                    log.info("######################## Authentication name: {}", name);
+
+                    // Response에 WEBIDE_USER 쿠키를 추가 합니다.
+                    String webideString = "WEBIDE_USER=" + name + "; Path=/; Domain=" + this.domainUrl + "; HttpOnly; Secure; SameSite=None";
+                    exchange.getResponse().getHeaders().add("Set-Cookie", webideString);
 
                     log.info("name: {}", name);
+                    // log.info("###### headers: {}", exchange.getResponse().getHeaders());
                     String path = exchange.getRequest().getURI().getRawPath();
 
                     if(!name.equals("admin") && !name.equals("administrator")) {
@@ -92,7 +105,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                     }
 
                     //log.info("authorization=" + exchange.getRequest().getHeaders().getFirst("Authorization"));
-                    log.info("cookie=" + exchange.getRequest().getHeaders().getFirst("Cookie"));
+                    //log.info("###### cookie=" + exchange.getRequest().getHeaders().getFirst("Cookie"));
 
                     log.info("path: {}", path);
 
