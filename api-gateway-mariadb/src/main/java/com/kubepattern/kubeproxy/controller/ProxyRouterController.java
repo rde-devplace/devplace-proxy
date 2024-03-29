@@ -1,6 +1,7 @@
 package com.kubepattern.kubeproxy.controller;
 
 import com.kubepattern.kubeproxy.model.ProxyRouter;
+import com.kubepattern.kubeproxy.service.IdeConfigService;
 import com.kubepattern.kubeproxy.service.ProxyRouterService;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
@@ -9,6 +10,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Flux;
@@ -22,14 +25,18 @@ public class ProxyRouterController {
 
     private final RouteDefinitionLocator routeDefinitionLocator;
 
+    private final IdeConfigService ideConfigService;
+
 
     public ProxyRouterController(   ProxyRouterService proxyRouterService,
                                     //ApplicationEventPublisher eventPublisher,
-                                    RouteDefinitionLocator routeDefinitionLocator
+                                    RouteDefinitionLocator routeDefinitionLocator,
+                                    IdeConfigService ideConfigService
     ) {
         this.proxyRouterService = proxyRouterService;
         //this.eventPublisher = eventPublisher;
         this.routeDefinitionLocator = routeDefinitionLocator;
+        this.ideConfigService = ideConfigService;
     }
 
     /**
@@ -109,6 +116,34 @@ public class ProxyRouterController {
         //proxyRouterService.refreshRoutes();
         //eventPublisher.publishEvent(new RefreshRoutesEvent(this));
         return routeDefinitionLocator.getRouteDefinitions();
+    }
+
+
+    @PostMapping("/api/route/vscode")
+    public List<ProxyRouter> addVscodeRouter(
+            @RequestParam String namespace,
+            @RequestParam String name,
+            @RequestParam(required = false, defaultValue = "")  String wsName,
+            @RequestParam(required = false, defaultValue = "")  String appName,
+            @RequestBody List<String> portList) {
+
+        List<ProxyRouter> proxyRouterList = ideConfigService.addIdeRoute(namespace, name, wsName, appName, portList);
+
+        List<ProxyRouter> savedRouterList = new ArrayList<>();
+        for (ProxyRouter proxyRouter : proxyRouterList) {
+            ProxyRouter savedRouter = proxyRouterService.save(proxyRouter);
+            savedRouterList.add(savedRouter);
+        }
+        getRouterList();
+
+        return savedRouterList;
+    }
+
+    @DeleteMapping("/api/route/vscode")
+    public ResponseEntity<Void> deleteRouterByUserName(@RequestParam String namespace, @RequestParam String name) {
+        proxyRouterService.deleteByUserName(name);
+        getRouterList();
+        return ResponseEntity.noContent().build();
     }
 }
 

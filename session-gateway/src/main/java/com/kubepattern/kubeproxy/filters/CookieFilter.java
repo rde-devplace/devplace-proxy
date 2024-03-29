@@ -1,5 +1,6 @@
 package com.kubepattern.kubeproxy.filters;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository;
@@ -13,6 +14,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class CookieFilter implements WebFilter, Ordered {
     private final ServerOAuth2AuthorizedClientRepository authorizedClientRepository;
@@ -24,6 +26,8 @@ public class CookieFilter implements WebFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         return chain.filter(exchange).then(Mono.fromRunnable(() -> {
+            log.info("######################## CookieFilter filter() host: {} path: {} uri: {}",
+                    exchange.getRequest().getHeaders().getHost(), exchange.getRequest().getPath(), exchange.getRequest().getURI());
             HttpHeaders headers = exchange.getResponse().getHeaders();
             List<String> originalCookies = headers.get(HttpHeaders.SET_COOKIE);
 

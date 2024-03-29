@@ -89,7 +89,6 @@ public class OAuth2LoginWebFluxSecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .authenticationMatcher(new PathPatternParserServerWebExchangeMatcher("/login/oauth2/code/{registrationId}"))
                 )
-                //.securityContextRepository(new WebSessionServerSecurityContextRepository())
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(authorize -> authorize.anyExchange().authenticated())
                 .logout(logout -> logout

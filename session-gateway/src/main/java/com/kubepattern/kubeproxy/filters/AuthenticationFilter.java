@@ -40,12 +40,13 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
-        log.info("######################## AuthenticationFilter filter() host: {} path: {} uri: {}",
-                exchange.getRequest().getHeaders().getHost(), exchange.getRequest().getPath(), exchange.getRequest().getURI());
+        //log.info("######################## AuthenticationFilter filter() host: {} path: {} uri: {}",
+        //        exchange.getRequest().getHeaders().getHost(), exchange.getRequest().getPath(), exchange.getRequest().getURI());
+        //log.info("###### header = {} ", exchange.getRequest().getHeaders());
 
         String sessionId = exchange.getRequest().getCookies().getFirst("SESSION").getValue();
         if(sessionId != null) {
-            String sessionString = "SESSION=" + exchangeHandler.extractSessionId(exchange, "SESSION").get() + "; Path=/; Domain=" + this.domainUrl + "; Secure; SameSite=None";
+            String sessionString = "SESSION=" + exchangeHandler.extractSessionId(exchange, "SESSION").get() + "; Path=/; Domain=." + this.domainUrl + "; Secure; SameSite=None";
             exchange.getResponse().getHeaders().add("Set-Cookie", sessionString);
         }
         Mono<SecurityContext> sercurityContextMono = exchange.getPrincipal()
@@ -60,16 +61,14 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         return sercurityContextMono
                 .filter(securityContext -> securityContext.getAuthentication() != null)
                 .map(securityContext -> {
-                    // SessionId를 추출하여 SESSION 쿠키를 추가 합니다.
-                    // String sessionString = "SESSION=" + tokenResponseUtil.extractSessionId(exchange, "SESSION").get() + "; Path=/; Domain=" + this.domainUrl + "; Secure; SameSite=None";
-                    // exchange.getResponse().getHeaders().add("Set-Cookie", sessionString);
 
                     this.exchangeHandler.addTokenToResponse(exchange, securityContext)
                             .subscribe(token -> {
                                 //log.info("###### token: {}", token);
-                                String cookieString = "access_token=" + token + "; Path=/; Domain=" + this.domainUrl + "; Secure; SameSite=None";
+                                String cookieString = "access_token=" + token + "; Path=/; Domain=." + this.domainUrl + "; Secure; SameSite=None";
+                                //String cookieString = "access_token=" + token + "; Path=/; Secure; SameSite=None";
                                 //exchange.getResponse().getHeaders().setBearerAuth(token);
-                                exchange.getResponse().getHeaders().add("Set-Cookie", cookieString);
+                                //YWYI exchange.getResponse().getHeaders().add("Set-Cookie", cookieString);
 
                             });
                     return (OAuth2User) securityContext.getAuthentication().getPrincipal();
@@ -80,38 +79,38 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                     log.info("######################## Authentication name: {}", name);
 
                     // Response에 WEBIDE_USER 쿠키를 추가 합니다.
-                    String webideString = "WEBIDE_USER=" + name + "; Path=/; Domain=" + this.domainUrl + "; HttpOnly; Secure; SameSite=None";
+                    String webideString = "WEBIDE_USER=" + name + "; Path=/; Domain=." + this.domainUrl + "; HttpOnly; Secure; SameSite=None";
                     exchange.getResponse().getHeaders().add("Set-Cookie", webideString);
 
                     log.info("name: {}", name);
-                    // log.info("###### headers: {}", exchange.getResponse().getHeaders());
+                    log.info("###### Authentication request.headers: {}", exchange.getRequest().getHeaders());
+                    log.info("###### Authentication response.headers: {}", exchange.getResponse().getHeaders());
+                    log.info(" ");
                     String path = exchange.getRequest().getURI().getRawPath();
+
 
                     if(!name.equals("admin") && !name.equals("administrator")) {
                         String patternString = String.format("/(%s)/.*/(vscode|cli|proxy|jupyter|tensorflow)(/|$)", name);
 
                         Pattern pattern = Pattern.compile(patternString);
-                        // Pattern pattern = Pattern.compile("/([^/]+)/(vscode|cli|proxy|jupyter)(/|$)");
                         Matcher matcher = pattern.matcher(path);
                         if (matcher.find()) {
                             String userName = matcher.group(1);
-                            log.info("userName: {}", userName);
+                            log.info("~~~~~userName: {}", userName);
                             if (!userName.equals(name)) {
-                                log.info("Forbidden: {}", path);
+                                log.info("~~~~~~~Forbidden: {}", path);
                                 exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
                                 return exchange.getResponse().setComplete();
                             }
                         }
                     }
 
-                    //log.info("authorization=" + exchange.getRequest().getHeaders().getFirst("Authorization"));
-                    //log.info("###### cookie=" + exchange.getRequest().getHeaders().getFirst("Cookie"));
 
                     log.info("path: {}", path);
 
                     return chain.filter(exchange);
-                })
-                .switchIfEmpty(chain.filter(exchange));
+                });
+                //.switchIfEmpty(chain.filter(exchange));
     }
 
 

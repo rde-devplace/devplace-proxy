@@ -8,7 +8,7 @@ spec:
   secretTemplate:
     annotations:
       kubed.appscode.com/sync: "amdp.io/tls=enabled"
-      update: 60fdf1d2989a7f29f14f553edc92a4c3
+      update: b895d0221f83ecc3400b989ca45dc271
   renewBefore: 240h
   dnsNames:
   - 'kube-proxy-rs.amdp-dev.skamdp.org'

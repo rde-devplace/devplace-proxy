@@ -59,7 +59,6 @@ public class JdbcSecurityContextRepository implements ServerSecurityContextRepos
     public Mono<SecurityContext> load(ServerWebExchange exchange) {
         String header = exchange.getRequest().getHeaders().toString();
         log.info("JdbcSecurityContextRepository.load -header : {}", header);
-        //String sessionId = extractSessionId(exchange.getRequest().getHeaders().getFirst("Cookie"));
         Optional<String> sessionId = JdbcSecurityContextRepository.extractSessionId(exchange, "SESSION");
         if(sessionId.isEmpty()) {
             log.info("JdbcSecurityContextRepository.load - sessionId is null");
@@ -76,7 +75,7 @@ public class JdbcSecurityContextRepository implements ServerSecurityContextRepos
                 log.info("JdbcSecurityContextRepository.load - sessionId : {}", sessionId.get());
                 Optional<SecurityContextEntity> optionalEntity = customSecurityContextRepository.findById(sessionId.get()); // 블로킹 호출
                 if (optionalEntity.isPresent()) {
-                    log.info("JdbcSecurityContextRepository.load - optionalEntity is {}", optionalEntity.get());
+                    log.info("JdbcSecurityContextRepository.load - optionalEntity is {}", optionalEntity.get().getSessionId());
                     SecurityContextEntity entity = optionalEntity.get();
                     String authentication = entity.getAuthentication();
                     OAuth2AuthenticationDetails authDetails = gson.fromJson(authentication, OAuth2AuthenticationDetails.class);
@@ -102,6 +101,7 @@ public class JdbcSecurityContextRepository implements ServerSecurityContextRepos
                     SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
                     securityContext.setAuthentication(authenticationToken);
 
+                    log.info("JdbcSecurityContextRepository.load - exchange : {}", exchange.getRequest().getHeaders());
 
                     return Mono.just(securityContext);
                 } else {
