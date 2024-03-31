@@ -1,5 +1,6 @@
 package com.kubepattern.kubeproxy.util;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -17,19 +18,26 @@ import java.util.regex.Pattern;
 @Component
 public class ExchangeHandler {
 
-    private final ReactiveOAuth2AuthorizedClientService authorizedClientService;
-    private static final Pattern HOST_PATTERN =
-            Pattern.compile("^(.+?)z([0-9]+)\\.kube-proxy\\.amdp-dev\\.skamdp\\.org$");
-    private static final Pattern SUBDOMAIN_PATTERN =
-            Pattern.compile("^([^z]+)");
+    /*
+    @Value("${ide.ide-proxy-host-pattern:^(.+?)z([0-9]+)\\.kube-proxy\\.amdp-dev\\.skamdp\\.org$}")
+    private String hostPattern;
+    @Value("${ide.ide-proxy-subdomain-pattern:^([^z]+)}")
+    private String subdomainPattern;
+
+    private final Pattern HOST_PATTERN;
+    private final Pattern SUBDOMAIN_PATTERN;
 
     public static final int EXTRACT_USER_NAME = 1;
     public static final int EXTRACT_PORT_NUMBER = 2;
     public static final int EXTRACT_SERVICE_NAME = 3;
     public static final String NONE = "none";
+*/
+    private final ReactiveOAuth2AuthorizedClientService authorizedClientService;
 
     public ExchangeHandler(ReactiveOAuth2AuthorizedClientService authorizedClientService) {
         this.authorizedClientService = authorizedClientService;
+        //this.HOST_PATTERN = Pattern.compile(this.hostPattern);
+        //this.SUBDOMAIN_PATTERN = Pattern.compile(this.subdomainPattern);
     }
 
     public Mono<String> addTokenToResponse(ServerWebExchange exchange, SecurityContext context) {
@@ -80,7 +88,8 @@ public class ExchangeHandler {
     }
 
 
-    public static String getFieldFromHost(String host, Integer type) {
+    /*
+    public String getFieldFromHost(String host, Integer type) {
         Matcher matcher = HOST_PATTERN.matcher(host);
 
         switch(type) {
@@ -109,6 +118,8 @@ public class ExchangeHandler {
         }
         return NONE;
     }
+
+     */
 
 }
 

@@ -3,6 +3,7 @@ package com.kubepattern.kubeproxy.filters;
 
 import com.kubepattern.kubeproxy.util.ExchangeHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -28,7 +29,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     private final ServerSecurityContextRepository serverSecurityContextRepository;
     private final ExchangeHandler exchangeHandler;
-    private final String domainUrl = "kube-proxy.amdp-dev.skamdp.org";
+
+    @Value("${kubeproxy.domain.url:kube-proxy.amdp-dev.skamdp.org}")
+    private String domainUrl;
 
 
     public AuthenticationFilter(ServerSecurityContextRepository serverSecurityContextRepository,

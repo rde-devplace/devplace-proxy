@@ -39,6 +39,9 @@ public class OAuth2LoginWebFluxSecurityConfig {
     @Value("${spring.security.oauth2.client.provider.keycloak.issuer-uri}")
     private String issuerUri;
 
+    @Value("${kubeproxy.domain.url:kube-proxy.amdp-dev.skamdp.org}")
+    private String domainUrl;
+
     private final CustomSecurityContextRepository customSecurityContextRepository;
 
     public OAuth2LoginWebFluxSecurityConfig(CustomSecurityContextRepository customSecurityContextRepository) {
@@ -93,13 +96,12 @@ public class OAuth2LoginWebFluxSecurityConfig {
                 .authorizeExchange(authorize -> authorize.anyExchange().authenticated())
                 .logout(logout -> logout
                                 .logoutHandler(keycloakServerLogoutHandler)
-                                //.logoutUrl(this.issuerUri + "/protocol/openid-connect/logout?redirect_uri=https://kube-proxy.amdp-dev.skamdp.org/list")
                                 .logoutSuccessHandler((message, authentication) -> {
                                     String sessionId = message.getExchange().getRequest().getCookies().getFirst("SESSION").getValue();
                                     if(sessionId !=null)
                                         customSecurityContextRepository.findById(sessionId);
                                     message.getExchange().getResponse().setStatusCode(HttpStatus.OK);
-                                    String uri = this.issuerUri + "/protocol/openid-connect/logout?redirect_uri=https://kube-proxy.amdp-dev.skamdp.org/list";
+                                    String uri = this.issuerUri + "/protocol/openid-connect/logout?redirect_uri=https://" + this.domainUrl + "/list";
 
                                     RedirectServerLogoutSuccessHandler successHandler = new RedirectServerLogoutSuccessHandler();
                                     successHandler.setLogoutSuccessUrl(URI.create(uri));

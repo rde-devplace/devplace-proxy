@@ -3,6 +3,7 @@ package com.kubepattern.kubeproxy.config;
 import com.kubepattern.kubeproxy.service.ProxyRouterService;
 import com.kubepattern.kubeproxy.util.ExchangeHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.gateway.filter.FilterDefinition;
 import org.springframework.cloud.gateway.filter.factory.RewritePathGatewayFilterFactory;
@@ -30,7 +31,8 @@ public class GatewayConfig {
 
     private final ProxyRouterService proxyRouterService;
 
-    private final String domainUrl = "kube-proxy.amdp-dev.skamdp.org";
+    @Value("${ide.ide-proxy-domain:kube-proxy.amdp-dev.skamdp.org}")
+    private String domainUrl;
 
     public GatewayConfig(ProxyRouterService proxyRouterService, ExchangeHandler exchangeHandler) {
         this.proxyRouterService = proxyRouterService;

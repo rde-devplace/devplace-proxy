@@ -14,7 +14,7 @@ spec:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8081'
         prometheus.io/path: '/actuator/prometheus'
-        update: 19dfd6820a05dd543f6ac6b0a211f264
+        update: 6ead728f15bb3cc2e6100ec721e1b6c5
       labels:
         app: kube-proxy
     spec:
@@ -46,3 +46,7 @@ spec:
               key: database-password
         - name: IDE_PROXY_DOMAIN
           value: kube-proxy.admp-dev.skamdp.org
+        - name: KEYCLOAK_CLIENT_ID
+          value: kube-proxy-renew
+        - name: KEYCLOAK_CLIENT_SECRET
+          value: B3x4C4DARIYPVemmXghmxZZdFGhfofWN

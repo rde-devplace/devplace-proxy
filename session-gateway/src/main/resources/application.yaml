@@ -3,8 +3,6 @@ server:
 logging:
   level:
     ROOT: INFO
-ide:
-  ide-proxy-domain: "kube-proxy.amdp-dev.skamdp.org"
 #    org.springframework.web: INFO
 #    org.springframework.cloud.gateway: INFO
 #    org.springframework.cloud.gateway.filter.LoggingGlobalFilter: INFO
@@ -83,12 +81,15 @@ spring:
             scope:
               - profile
               - email
-
+ide:
+  ide-proxy-domain: "localhost:8080"
 ---
 server:
   port: 8080
   logging:
     level: ${LOGGING_LEVEL}
+ide:
+  ide-proxy-domain: ${IDE_PROXY_DOMAIN}
 
 spring:
   config:
@@ -149,10 +150,10 @@ spring:
           keycloak:
             issuer-uri: https://console-dev.skamdp.org/iam/realms/amdp-dev
         registration:
-          kube-proxy-renew:
+          ${KEYCLOAK_CLIENT_ID}:
             provider: keycloak
-            client-id: kube-proxy-renew
-            client-secret: B3x4C4DARIYPVemmXghmxZZdFGhfofWN
+            client-id: ${KEYCLOAK_CLIENT_ID}
+            client-secret: ${KEYCLOAK_CLIENT_SECRET}
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             scope:

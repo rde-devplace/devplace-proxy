@@ -46,3 +46,7 @@ spec:
               key: database-password
         - name: IDE_PROXY_DOMAIN
           value: ${IDE_PROXY_DOMAIN}
+        - name: KEYCLOAK_CLIENT_ID
+          value: ${KEYCLOAK_CLIENT_ID}
+        - name: KEYCLOAK_CLIENT_SECRET
+          value: ${KEYCLOAK_CLIENT_SECRET}
