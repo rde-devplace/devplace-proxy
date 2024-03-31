@@ -135,10 +135,8 @@ spring:
           filters:
             - RewritePath=/ide-manager/(?<segment>.*), /$\{segment}
       httpclient:
-        connect-timeout: 10000 # 밀리초 단위, 예: 10초
-        read-timeout: 10000 # 밀리초 단위, 예: 10초
         websocket:
-          max-frame-payload-length: 1000000
+          max-frame-payload-length: 10000000
   security:
     oauth2:
       resourceserver:
