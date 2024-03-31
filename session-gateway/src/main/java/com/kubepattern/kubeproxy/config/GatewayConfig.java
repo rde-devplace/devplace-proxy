@@ -30,9 +30,6 @@ public class GatewayConfig {
 
     private final ProxyRouterService proxyRouterService;
 
-    // private final TokenResponseUtil tokenResponseUtil;
-    //private final SubDomainGatewayFilter subDomainGatewayFilter;
-
     private final String domainUrl = "kube-proxy.amdp-dev.skamdp.org";
 
     public GatewayConfig(ProxyRouterService proxyRouterService, ExchangeHandler exchangeHandler) {
@@ -109,7 +106,7 @@ public class GatewayConfig {
 
                                 destinationUri[0] = destinationUri[0] + servicePrefix + "-rde-service:" + portNumber;
 
-                                log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$ Request URI: {} idName={} portNumber={}", exchange.getRequest().getURI(), idName, portNumber);
+                                log.debug("$$$$$$$$$$$$$$$$$$$$$$$$$$$ Request URI: {} idName={} portNumber={}", exchange.getRequest().getURI(), idName, portNumber);
                                 // 동적으로 결정된 URI로 exchange의 요청 URI 변경
 
                                 // 수정된 exchange 객체로 필터 체인 계속
@@ -122,29 +119,5 @@ public class GatewayConfig {
     }
 
          */
-
-    /*
-
-    @Bean
-    public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
-        AtomicReference<String> destinationUri = new AtomicReference<>("");
-        return builder.routes()
-                .route("dynamic_route", r -> r
-                        .host("*." + domainUrl)
-                        .and().path("/**")
-                        .filters(f -> f.filter((exchange, chain) -> {
-                            String host = exchange.getRequest().getURI().getHost();
-                            String idName = TokenResponseUtil.getFieldFromHost(host, 1);
-                            String servicePrefix = TokenResponseUtil.getFieldFromHost(host, 3);
-                            String portNumber = TokenResponseUtil.getFieldFromHost(host, 2);
-
-                            //log.info("####################### Request URI: {} idName={} portNumber={}", exchange.getRequest().getURI(), idName, portNumber);
-                            //destinationUri.set("http://" + servicePrefix + "-" + portNumber);
-                            return chain.filter(exchange);
-
-                        }))
-                        .uri("http://localhost:8080")
-                        .build();
-    } */
 
 }

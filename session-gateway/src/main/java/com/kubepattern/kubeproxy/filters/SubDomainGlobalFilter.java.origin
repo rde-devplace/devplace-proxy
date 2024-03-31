@@ -24,14 +24,14 @@ public class SubDomainGlobalFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
-        log.info("?F??????????????????????? SubDomainGlobalFilter filter() host: {} path: {} uri: {}",
+        log.debug("?F??????????????????????? SubDomainGlobalFilter filter() host: {} path: {} uri: {}",
                 exchange.getRequest().getHeaders().getHost(), exchange.getRequest().getPath(), exchange.getRequest().getURI());
         Mono<SecurityContext> securityContextMono = exchange.getPrincipal()
                 .flatMap(principal -> {
                     if (principal instanceof Authentication) {
                         SecurityContextHolder.getContext().setAuthentication((Authentication) principal);
                     }
-                    log.info("Mono<SecurityContext> securityContextMono: {}", SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+                    log.debug("Mono<SecurityContext> securityContextMono: {}", SecurityContextHolder.getContext().getAuthentication().getPrincipal());
                     return Mono.justOrEmpty(SecurityContextHolder.getContext());
                 });
 
@@ -49,27 +49,27 @@ public class SubDomainGlobalFilter implements GlobalFilter, Ordered {
                     String userName = ExchangeHandler.getFieldFromHost(host, ExchangeHandler.EXTRACT_USER_NAME);
                     String portNumber = ExchangeHandler.getFieldFromHost(host, ExchangeHandler.EXTRACT_PORT_NUMBER);
                     String serviceName = ExchangeHandler.getFieldFromHost(host, ExchangeHandler.EXTRACT_SERVICE_NAME);
-                    log.info(" $$$$$$$$$$$$$$$$: host: {} userName: {} portNumber: {} serviceName: {}", host, userName, portNumber, serviceName);
+                    log.debug(" $$$$$$$$$$$$$$$$: host: {} userName: {} portNumber: {} serviceName: {}", host, userName, portNumber, serviceName);
                     // 1. himang10-8443.kube-proxy...의 userName = himang10, portNumber = 8443
                     if (userName.equals(ExchangeHandler.NONE)) {
-                        log.info(" $$$$$$$$$$$$$$$$$$ PASS: host: {} userName: {} name: {} portNumber: {}", host, userName, name, portNumber);
+                        log.debug(" $$$$$$$$$$$$$$$$$$ PASS: host: {} userName: {} name: {} portNumber: {}", host, userName, name, portNumber);
                         return chain.filter(exchange);
 
                     } else if (!userName.equals(name)) {
-                        log.info("Forbidden: host: {} userName: {} name: {}", host, userName, name);
+                        log.debug("Forbidden: host: {} userName: {} name: {}", host, userName, name);
                         exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
                         return exchange.getResponse().setComplete();
 
                     } else {
-                        log.info(" $$$$$$$$$$$$$$$$$$ Dynamic Routing host: {} userName: {} name: {}", host, userName, name);
+                        log.debug(" $$$$$$$$$$$$$$$$$$ Dynamic Routing host: {} userName: {} name: {}", host, userName, name);
                         String dynamicUri = "http://himang10-rde-service.part-rde:8443";
                         //String dynamicUri = "http://" + serviceName + "-rde-service.part-rde:" + portNumber;
                         URI newUri = URI.create(dynamicUri);
 
                         // 동적으로 결정된 URI로 요청을 변경
                         ServerWebExchange modifiedExchange = exchange.mutate().request(builder -> builder.uri(newUri)).build();
-                        log.info("????????????????????????? dynamic uri={} DynamicUriGatewayFilterFactory modifiedExchange={}", dynamicUri, modifiedExchange.getRequest().getPath());
-                        log.info("uri={} path={} host={} ", modifiedExchange.getRequest().getURI(),
+                        log.debug("????????????????????????? dynamic uri={} DynamicUriGatewayFilterFactory modifiedExchange={}", dynamicUri, modifiedExchange.getRequest().getPath());
+                        log.debug("uri={} path={} host={} ", modifiedExchange.getRequest().getURI(),
                                 modifiedExchange.getRequest().getPath(), modifiedExchange.getRequest().getHeaders().getHost());
                         // 변경된 exchange로 필터 체인 계속
                         return chain.filter(modifiedExchange);

@@ -35,11 +35,11 @@ public class JdbcSecurityContextRepository implements ServerSecurityContextRepos
     @Transactional
     public Mono<Void> save(ServerWebExchange exchange, SecurityContext context) {
         String header = exchange.getRequest().getHeaders().toString();
-        log.info("JdbcSecurityContextRepository.save - header : {}" + header);
+        log.debug("JdbcSecurityContextRepository.save - header : {}" + header);
         Optional<String> sessionId = JdbcSecurityContextRepository.extractSessionId(exchange, "SESSION");
 
         if (sessionId.isEmpty()) {
-            log.info("JdbcSecurityContextRepository.save - sessionId is null");
+            log.debug("JdbcSecurityContextRepository.save - sessionId is null");
             return Mono.empty(); // sessionId가 null일 경우, 빈 Mono 반환
         } else {
             return Mono.fromCallable(() -> {
@@ -58,10 +58,10 @@ public class JdbcSecurityContextRepository implements ServerSecurityContextRepos
     @Override
     public Mono<SecurityContext> load(ServerWebExchange exchange) {
         String header = exchange.getRequest().getHeaders().toString();
-        log.info("JdbcSecurityContextRepository.load -header : {}", header);
+        log.debug("JdbcSecurityContextRepository.load -header : {}", header);
         Optional<String> sessionId = JdbcSecurityContextRepository.extractSessionId(exchange, "SESSION");
         if(sessionId.isEmpty()) {
-            log.info("JdbcSecurityContextRepository.load - sessionId is null");
+            log.debug("JdbcSecurityContextRepository.load - sessionId is null");
             return exchange.getPrincipal().flatMap(principal -> {
                 if (principal instanceof Authentication) {
                     SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
@@ -72,10 +72,10 @@ public class JdbcSecurityContextRepository implements ServerSecurityContextRepos
             });
         } else {
             return Mono.defer(() -> {
-                log.info("JdbcSecurityContextRepository.load - sessionId : {}", sessionId.get());
+                log.debug("JdbcSecurityContextRepository.load - sessionId : {}", sessionId.get());
                 Optional<SecurityContextEntity> optionalEntity = customSecurityContextRepository.findById(sessionId.get()); // 블로킹 호출
                 if (optionalEntity.isPresent()) {
-                    log.info("JdbcSecurityContextRepository.load - optionalEntity is {}", optionalEntity.get().getSessionId());
+                    log.debug("JdbcSecurityContextRepository.load - optionalEntity is {}", optionalEntity.get().getSessionId());
                     SecurityContextEntity entity = optionalEntity.get();
                     String authentication = entity.getAuthentication();
                     OAuth2AuthenticationDetails authDetails = gson.fromJson(authentication, OAuth2AuthenticationDetails.class);
@@ -101,11 +101,11 @@ public class JdbcSecurityContextRepository implements ServerSecurityContextRepos
                     SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
                     securityContext.setAuthentication(authenticationToken);
 
-                    log.info("JdbcSecurityContextRepository.load - exchange : {}", exchange.getRequest().getHeaders());
+                    log.debug("JdbcSecurityContextRepository.load - exchange : {}", exchange.getRequest().getHeaders());
 
                     return Mono.just(securityContext);
                 } else {
-                    log.info("JdbcSecurityContextRepository.load - optionalEntity is null");
+                    log.debug("JdbcSecurityContextRepository.load - optionalEntity is null");
                     return exchange.getPrincipal().flatMap(principal -> {
                         if (principal instanceof Authentication) {
                             SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
@@ -125,10 +125,10 @@ public class JdbcSecurityContextRepository implements ServerSecurityContextRepos
     public Mono<SecurityContext> load(ServerWebExchange exchange) {
         return Mono.defer(() -> {
             String header = exchange.getRequest().getHeaders().toString();
-            log.info("JdbcSecurityContextRepository.load -header : {}", header);
+            log.debug("JdbcSecurityContextRepository.load -header : {}", header);
             String sessionId = extractSessionId(exchange.getRequest().getHeaders().getFirst("Cookie"));
             if(sessionId == null) {
-                log.info("JdbcSecurityContextRepository.load - sessionId is null");
+                log.debug("JdbcSecurityContextRepository.load - sessionId is null");
                 return exchange.getPrincipal()
                         .flatMap(principal -> {
                             if (principal instanceof Authentication) {
@@ -139,7 +139,7 @@ public class JdbcSecurityContextRepository implements ServerSecurityContextRepos
                             return Mono.empty();
                         });
             } else {
-                    log.info("JdbcSecurityContextRepository.load - sessionId : {}", sessionId);
+                    log.debug("JdbcSecurityContextRepository.load - sessionId : {}", sessionId);
                     Optional<SecurityContextEntity> optionalEntity =  securityContextRepository.findById(sessionId); // 블로킹 호출
                     if(optionalEntity.isPresent()) {
                         SecurityContextEntity entity = optionalEntity.get();
@@ -168,7 +168,7 @@ public class JdbcSecurityContextRepository implements ServerSecurityContextRepos
 
                         return Mono.just(securityContext);
                     } else {
-                        log.info("JdbcSecurityContextRepository.load - optionalEntity is null");
+                        log.debug("JdbcSecurityContextRepository.load - optionalEntity is null");
                         return Mono.empty();
                     }
             }

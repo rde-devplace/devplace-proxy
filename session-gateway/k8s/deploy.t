@@ -44,4 +44,5 @@ spec:
             secretKeyRef:
               name: datasource-secrets
               key: database-password
-
+        - name: IDE_PROXY_DOMAIN
+          value: ${IDE_PROXY_DOMAIN}

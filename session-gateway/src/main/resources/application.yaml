@@ -3,6 +3,8 @@ server:
 logging:
   level:
     ROOT: INFO
+ide:
+  ide-proxy-domain: "kube-proxy.amdp-dev.skamdp.org"
 #    org.springframework.web: INFO
 #    org.springframework.cloud.gateway: INFO
 #    org.springframework.cloud.gateway.filter.LoggingGlobalFilter: INFO
@@ -39,8 +41,8 @@ spring:
     show-sql: false
     hibernate:
       #ddl-auto: create
-      #ddl-auto: update
-      ddl-auto: create-drop
+      ddl-auto: update
+      #ddl-auto: create-drop
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
         #physical-strategy: cnadata.outbox.util.DBLowerCaseNamingStrategy
@@ -121,6 +123,16 @@ spring:
           uri: http://frontend-ide-service.part-rde:8080
           predicates:
             - Path=/console/**
+        - id: operator
+          uri: http://ide-operator-service.part-rde:8080
+          predicates:
+            - Path=/api/**
+        - id: ide-manger
+          uri: http://ide-manager-service.part-rde:8080
+          predicates:
+            - Path=/ide-manager/**
+          filters:
+            - RewritePath=/ide-manager/(?<segment>.*), /$\{segment}
       httpclient:
         connect-timeout: 10000 # 밀리초 단위, 예: 10초
         read-timeout: 10000 # 밀리초 단위, 예: 10초

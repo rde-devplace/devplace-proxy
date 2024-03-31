@@ -40,9 +40,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
-        //log.info("######################## AuthenticationFilter filter() host: {} path: {} uri: {}",
+        //log.debug("######################## AuthenticationFilter filter() host: {} path: {} uri: {}",
         //        exchange.getRequest().getHeaders().getHost(), exchange.getRequest().getPath(), exchange.getRequest().getURI());
-        //log.info("###### header = {} ", exchange.getRequest().getHeaders());
+        log.debug("###### header = {} ", exchange.getRequest().getHeaders());
 
         String sessionId = exchange.getRequest().getCookies().getFirst("SESSION").getValue();
         if(sessionId != null) {
@@ -64,7 +64,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
                     this.exchangeHandler.addTokenToResponse(exchange, securityContext)
                             .subscribe(token -> {
-                                //log.info("###### token: {}", token);
+                                //log.debug("###### token: {}", token);
                                 String cookieString = "access_token=" + token + "; Path=/; Domain=." + this.domainUrl + "; Secure; SameSite=None";
                                 //String cookieString = "access_token=" + token + "; Path=/; Secure; SameSite=None";
                                 //exchange.getResponse().getHeaders().setBearerAuth(token);
@@ -76,16 +76,16 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                 .flatMap(oAuth2User -> {
                     String name = oAuth2User.getAttribute("preferred_username");
                     // String forUserName = tokenResponseUtil.extractSubdomain(exchange);
-                    log.info("######################## Authentication name: {}", name);
+                    log.debug("######################## Authentication name: {}", name);
 
                     // Response에 WEBIDE_USER 쿠키를 추가 합니다.
                     String webideString = "WEBIDE_USER=" + name + "; Path=/; Domain=." + this.domainUrl + "; HttpOnly; Secure; SameSite=None";
                     exchange.getResponse().getHeaders().add("Set-Cookie", webideString);
 
-                    log.info("name: {}", name);
-                    log.info("###### Authentication request.headers: {}", exchange.getRequest().getHeaders());
-                    log.info("###### Authentication response.headers: {}", exchange.getResponse().getHeaders());
-                    log.info(" ");
+                    log.debug("name: {}", name);
+                    log.debug("###### Authentication request.headers: {}", exchange.getRequest().getHeaders());
+                    log.debug("###### Authentication response.headers: {}", exchange.getResponse().getHeaders());
+                    log.debug(" ");
                     String path = exchange.getRequest().getURI().getRawPath();
 
 
@@ -96,9 +96,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                         Matcher matcher = pattern.matcher(path);
                         if (matcher.find()) {
                             String userName = matcher.group(1);
-                            log.info("~~~~~userName: {}", userName);
+                            log.debug("~~~~~userName: {}", userName);
                             if (!userName.equals(name)) {
-                                log.info("~~~~~~~Forbidden: {}", path);
+                                log.debug("~~~~~~~Forbidden: {}", path);
                                 exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
                                 return exchange.getResponse().setComplete();
                             }
@@ -106,7 +106,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                     }
 
 
-                    log.info("path: {}", path);
+                    log.debug("path: {}", path);
 
                     return chain.filter(exchange);
                 });

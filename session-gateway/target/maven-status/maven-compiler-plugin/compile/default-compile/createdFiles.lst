@@ -17,5 +17,6 @@ com/kubepattern/kubeproxy/util/SubdomainEncodingUtil.class
 com/kubepattern/kubeproxy/repo/JdbcSecurityContextRepository.class
 com/kubepattern/kubeproxy/model/OAuth2UserDetails.class
 com/kubepattern/kubeproxy/filters/CookieFilter.class
+com/kubepattern/kubeproxy/model/ProxyRouterId.class
 com/kubepattern/kubeproxy/model/OAuth2AuthenticationDetails.class
 com/kubepattern/kubeproxy/repo/ProxyRouterRepository.class

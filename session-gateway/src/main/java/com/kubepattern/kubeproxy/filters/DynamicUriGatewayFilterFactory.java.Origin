@@ -35,15 +35,15 @@ public class DynamicUriGatewayFilterFactory extends AbstractGatewayFilterFactory
     public GatewayFilter apply(Config config) {
         return new OrderedGatewayFilter((exchange, chain) -> {
 
-            log.info("????????????????????????? DynamicUriGatewayFilterFactory config={}", config.toString());
+            log.debug("????????????????????????? DynamicUriGatewayFilterFactory config={}", config.toString());
             String dynamicUri = determineDynamicUri(exchange);
 
             // 동적으로 결정된 URI로 요청을 변경
             ServerWebExchange modifiedExchange = exchange.mutate()
                     .request(builder -> builder.uri(URI.create(dynamicUri)).path("/vscode/").build())
                     .build();
-            log.info("????????????????????????? dynamic uri={} DynamicUriGatewayFilterFactory modifiedExchange={}", dynamicUri, modifiedExchange.getRequest().getPath());
-            log.info("uri={} path={} host={} ", modifiedExchange.getRequest().getURI(),
+            log.debug("????????????????????????? dynamic uri={} DynamicUriGatewayFilterFactory modifiedExchange={}", dynamicUri, modifiedExchange.getRequest().getPath());
+            log.debug("uri={} path={} host={} ", modifiedExchange.getRequest().getURI(),
                     modifiedExchange.getRequest().getPath(), modifiedExchange.getRequest().getHeaders().getHost());
             // 변경된 exchange로 필터 체인 계속
             return chain.filter(modifiedExchange);

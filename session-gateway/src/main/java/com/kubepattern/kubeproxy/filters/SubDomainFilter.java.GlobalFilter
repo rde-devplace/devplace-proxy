@@ -56,18 +56,18 @@ public class SubDomainFilter implements GlobalFilter, Ordered {
                     String host = exchange.getRequest().getURI().getHost();
 
                     Matcher matcher = HOST_PATTERN.matcher(host);
-                    //log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ host: {} matcher={}", host, matcher);
+                    //log.debug("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ host: {} matcher={}", host, matcher);
                     if(matcher!=null && matcher.matches()) {
                         // himang10-8080.kube-proxy.amdp-dev.skamdp.org 형태의 host에서 himanag10을 추출
-                        //log.info("##################################### matcher.group()={} group(1)={}end", matcher.group(), matcher.group(1));
+                        //log.debug("##################################### matcher.group()={} group(1)={}end", matcher.group(), matcher.group(1));
                         String firstName = matcher.group(1);
-                        //log.info("##################################### firstName={}end", firstName);
+                        //log.debug("##################################### firstName={}end", firstName);
                         Matcher subDomainMatcher = SUBDOMAIN_PATTERN.matcher(firstName);
-                        //log.info("##################################### subDomainMatcher={}end", subDomainMatcher);
+                        //log.debug("##################################### subDomainMatcher={}end", subDomainMatcher);
                         String sdUser = subDomainMatcher.find()? subDomainMatcher.group(1): "none";
-                        log.info("############## matched host: {} sdUser={} name={}", host, sdUser, name);
+                        log.debug("############## matched host: {} sdUser={} name={}", host, sdUser, name);
                         if (sdUser != null && !name.equals(sdUser)) {
-                            log.info("Forbidden: host: {} userName: {}", host, name);
+                            log.debug("Forbidden: host: {} userName: {}", host, name);
                             exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
                             return exchange.getResponse().setComplete();
                         }

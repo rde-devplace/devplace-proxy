@@ -104,7 +104,7 @@ public class OAuth2LoginWebFluxSecurityConfig {
                                     RedirectServerLogoutSuccessHandler successHandler = new RedirectServerLogoutSuccessHandler();
                                     successHandler.setLogoutSuccessUrl(URI.create(uri));
 
-                                    log.info("logoutSuccessHandler sessionId: {}", sessionId);
+                                    log.debug("logoutSuccessHandler sessionId: {}", sessionId);
                                     return logoutSuccessHandler().onLogoutSuccess(message, authentication);
                                     //return handler.logout(message, authentication);
                                 })

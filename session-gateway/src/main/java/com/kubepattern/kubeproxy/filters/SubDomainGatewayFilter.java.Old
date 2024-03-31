@@ -54,23 +54,23 @@ public class SubDomainGatewayFilterOld implements GatewayFilter, Ordered {
                 .flatMap(oAuth2User -> {
                     String name = oAuth2User.getAttribute("preferred_username");
                     String host = exchange.getRequest().getURI().getHost();
-                    log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ user = {} host={} oAuth2User={}", name, host, oAuth2User);
+                    log.debug("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ user = {} host={} oAuth2User={}", name, host, oAuth2User);
 
                     Matcher matcher = HOST_PATTERN.matcher(host);
                     // *.kube-proxy.amdp-dev.skamdp.org 유형으로 요청된 경우
                     if(matcher!=null && matcher.matches()) {
-                        log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ matcher.group()={} group(1)={}end", matcher.group(), matcher.group(1));
+                        log.debug("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ matcher.group()={} group(1)={}end", matcher.group(), matcher.group(1));
                         String firstName = matcher.group(1);
                         String portNumber = matcher.group(2);
                         Matcher subDomainMatcher = SUBDOMAIN_PATTERN.matcher(firstName);
                         String sdUser = subDomainMatcher.find()? subDomainMatcher.group(1): "none";
-                        log.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ matched host: {} sdUser={} name={}", host, sdUser, name);
+                        log.debug("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ matched host: {} sdUser={} name={}", host, sdUser, name);
                         if (sdUser != null && !name.equals(sdUser)) {
-                            log.info("Forbidden: host: {} userName: {}", host, name);
+                            log.debug("Forbidden: host: {} userName: {}", host, name);
                             exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
                             return exchange.getResponse().setComplete();
                         } else if (name.equals(sdUser)) {
-                            log.info("Allowed: host: {} userName: {}", host, name);
+                            log.debug("Allowed: host: {} userName: {}", host, name);
                             String destinationUri = "http://" + firstName + "-" + "-rde-service" +  portNumber;
                             ServerWebExchange modifedExchange = exchange.mutate()
                                     .request(request -> request.uri(URI.create(destinationUri)))

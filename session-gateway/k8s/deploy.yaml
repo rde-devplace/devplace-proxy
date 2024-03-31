@@ -14,7 +14,7 @@ spec:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8081'
         prometheus.io/path: '/actuator/prometheus'
-        update: 324dfd83140609e9de9a39e0bb28bee0
+        update: 19dfd6820a05dd543f6ac6b0a211f264
       labels:
         app: kube-proxy
     spec:
@@ -44,4 +44,5 @@ spec:
             secretKeyRef:
               name: datasource-secrets
               key: database-password
-
+        - name: IDE_PROXY_DOMAIN
+          value: kube-proxy.admp-dev.skamdp.org
