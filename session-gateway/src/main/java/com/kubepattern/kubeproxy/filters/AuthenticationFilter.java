@@ -67,11 +67,11 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
                     this.exchangeHandler.addTokenToResponse(exchange, securityContext)
                             .subscribe(token -> {
-                                //log.debug("###### token: {}", token);
+                                log.debug("###### token: {}", token);
                                 String cookieString = "access_token=" + token + "; Path=/; Domain=." + this.domainUrl + "; Secure; SameSite=None";
                                 //String cookieString = "access_token=" + token + "; Path=/; Secure; SameSite=None";
                                 //exchange.getResponse().getHeaders().setBearerAuth(token);
-                                //YWYI exchange.getResponse().getHeaders().add("Set-Cookie", cookieString);
+                                exchange.getResponse().getHeaders().add("Set-Cookie", cookieString);
 
                             });
                     return (OAuth2User) securityContext.getAuthentication().getPrincipal();

@@ -133,7 +133,7 @@ spring:
           predicates:
             - Path=/ide-manager/**
           filters:
-            - RewritePath=/ide-manager/(?<segment>.*), /$\{segment}
+            - RewritePath=/(?<segment>.*), /${segment}
       httpclient:
         websocket:
           max-frame-payload-length: 10000000

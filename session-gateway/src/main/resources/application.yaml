@@ -124,16 +124,16 @@ spring:
           uri: http://frontend-ide-service.part-rde:8080
           predicates:
             - Path=/console/**
-        - id: operator
-          uri: http://ide-operator-service.part-rde:8080
-          predicates:
-            - Path=/api/**
-        - id: ide-manger
-          uri: http://ide-manager-service.part-rde:8080
-          predicates:
-            - Path=/ide-manager/**
-          filters:
-            - RewritePath=/ide-manager/(?<segment>.*), /$\{segment}
+        #- id: operator
+        #  uri: http://ide-operator-service.part-rde:8080
+        #  predicates:
+        #    - Path=/api/**
+        #- id: ide-manger
+        #  uri: http://ide-manager-service.part-rde:8080
+        #  predicates:
+        #    - Path=/ide-manager/**
+        #  filters:
+        #    - RewritePath=/(?<segment>.*), /${segment}
       httpclient:
         websocket:
           max-frame-payload-length: 10000000
