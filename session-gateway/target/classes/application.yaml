@@ -86,8 +86,13 @@ ide:
 ---
 server:
   port: 8080
-  logging:
-    level: ${LOGGING_LEVEL}
+logging:
+  level:
+    ROOT: ${LOGGING_LEVEL}
+    org.springframework.cloud.gateway: ${LOGGING_LEVEL}
+    reactor.netty.http.client.HttpClient: ${LOGGING_LEVEL}
+    org.springframework.web.reactive: ${LOGGING_LEVEL}
+    org.springframework.http.server.reactive: ${LOGGING_LEVEL}
 ide:
   ide-proxy-domain: ${IDE_PROXY_DOMAIN}
 
@@ -124,16 +129,16 @@ spring:
           uri: http://frontend-ide-service.part-rde:8080
           predicates:
             - Path=/console/**
-        - id: operator
-          uri: http://ide-operator-service.part-rde:8080
-          predicates:
-            - Path=/api/**
-        - id: ide-manger
-          uri: http://ide-manager-service.part-rde:8080
-          predicates:
-            - Path=/ide-manager/**
-          filters:
-            - RewritePath=/(?<segment>.*), /${segment}
+        #- id: operator
+        #  uri: http://ide-operator-service.part-rde:8080
+        #  predicates:
+        #    - Path=/api/**
+        #- id: ide-manger
+        #  uri: http://ide-manager-service.part-rde:8080
+        #  predicates:
+        #    - Path=/ide-manager/**
+        #  filters:
+        #    - RewritePath=/(?<segment>.*), /${segment}
       httpclient:
         websocket:
           max-frame-payload-length: 10000000

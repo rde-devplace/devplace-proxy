@@ -86,8 +86,13 @@ ide:
 ---
 server:
   port: 8080
-  logging:
-    level: ${LOGGING_LEVEL}
+logging:
+  level:
+    ROOT: ${LOGGING_LEVEL}
+    org.springframework.cloud.gateway: ${LOGGING_LEVEL}
+    reactor.netty.http.client.HttpClient: ${LOGGING_LEVEL}
+    org.springframework.web.reactive: ${LOGGING_LEVEL}
+    org.springframework.http.server.reactive: ${LOGGING_LEVEL}
 ide:
   ide-proxy-domain: ${IDE_PROXY_DOMAIN}
 

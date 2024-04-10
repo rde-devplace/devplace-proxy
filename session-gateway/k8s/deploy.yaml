@@ -14,7 +14,7 @@ spec:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8081'
         prometheus.io/path: '/actuator/prometheus'
-        update: 2f3e87ed06ec71db9f47b3242e959c33
+        update: 4dc2d7b4381f58718b7166a3fe03af9a
       labels:
         app: kube-proxy
     spec:
@@ -22,7 +22,7 @@ spec:
       - name: harbor-registry-secret
       containers:
       - name: kube-proxy
-        image: amdp-registry.skamdp.org/mydev-ywyi/kube-proxy:SDV.1.0.3
+        image: amdp-registry.skamdp.org/mydev-ywyi/kube-proxy:IDE.1.0.5
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -45,7 +45,7 @@ spec:
               name: datasource-secrets
               key: database-password
         - name: IDE_PROXY_DOMAIN
-          value: kube-proxy.admp-dev.skamdp.org
+          value: kube-proxy.amdp-dev.skamdp.org
         - name: KEYCLOAK_CLIENT_ID
           value: kube-proxy-renew
         - name: KEYCLOAK_CLIENT_SECRET
