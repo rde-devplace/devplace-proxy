@@ -1,9 +1,5 @@
 package com.kubepattern.kubeproxy.config;
 
-import com.kubepattern.kubeproxy.model.SecurityContextEntity;
-import com.kubepattern.kubeproxy.repo.CustomSecurityContextRepository;
-import com.kubepattern.kubeproxy.repo.JdbcSecurityContextRepository;
-import com.kubepattern.kubeproxy.service.KeycloakServerLogoutHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
@@ -15,6 +11,7 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 
 
+import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
@@ -42,10 +39,10 @@ public class OAuth2LoginWebFluxSecurityConfig {
     @Value("${ide.ide-proxy-domain:kube-proxy.amdp-dev.skamdp.org}")
     private String domainUrl;
 
-    private final CustomSecurityContextRepository customSecurityContextRepository;
+    private final ReactiveOAuth2AuthorizedClientService authorizedClientService;
 
-    public OAuth2LoginWebFluxSecurityConfig(CustomSecurityContextRepository customSecurityContextRepository) {
-        this.customSecurityContextRepository = customSecurityContextRepository;
+    public OAuth2LoginWebFluxSecurityConfig(ReactiveOAuth2AuthorizedClientService authorizedClientService) {
+        this.authorizedClientService = authorizedClientService;
     }
 
     @Bean
@@ -56,10 +53,14 @@ public class OAuth2LoginWebFluxSecurityConfig {
     }
 
 
+    /*
     @Bean
     ServerSecurityContextRepository jdbcSecurityContextRepository() {
-        return new JdbcSecurityContextRepository(customSecurityContextRepository);
+        return new JdbcSecurityContextRepository(customSecurityContextRepository, authorizedClientService);
     }
+
+     */
+
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, OAuth2ClientProperties oAuth2ClientProperties) {
         HeaderWriterServerLogoutHandler handler = new HeaderWriterServerLogoutHandler(
@@ -69,7 +70,7 @@ public class OAuth2LoginWebFluxSecurityConfig {
                         ClearSiteDataServerHttpHeadersWriter.Directive.EXECUTION_CONTEXTS
                 )
         );
-        KeycloakServerLogoutHandler keycloakServerLogoutHandler = new KeycloakServerLogoutHandler(handler, customSecurityContextRepository);
+        //KeycloakServerLogoutHandler keycloakServerLogoutHandler = new KeycloakServerLogoutHandler(handler, customSecurityContextRepository);
 
         http.authorizeExchange(
                 exchange -> exchange.pathMatchers(
@@ -93,11 +94,9 @@ public class OAuth2LoginWebFluxSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(authorize -> authorize.anyExchange().authenticated())
                 .logout(logout -> logout
-                                .logoutHandler(keycloakServerLogoutHandler)
+                                //.logoutHandler(keycloakServerLogoutHandler)
                                 .logoutSuccessHandler((message, authentication) -> {
                                     String sessionId = message.getExchange().getRequest().getCookies().getFirst("SESSION").getValue();
-                                    if(sessionId !=null)
-                                        customSecurityContextRepository.findById(sessionId);
                                     message.getExchange().getResponse().setStatusCode(HttpStatus.OK);
                                     String uri = this.issuerUri + "/protocol/openid-connect/logout?redirect_uri=https://" + this.domainUrl + "/list";
 
@@ -113,7 +112,7 @@ public class OAuth2LoginWebFluxSecurityConfig {
 
 
         // Custom Security Context 처리를 추가한다.
-        http.securityContextRepository(jdbcSecurityContextRepository());
+        //http.securityContextRepository(jdbcSecurityContextRepository());
 
         return http.build();
     }

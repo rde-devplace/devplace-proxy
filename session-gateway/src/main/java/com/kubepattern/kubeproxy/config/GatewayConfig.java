@@ -34,7 +34,7 @@ public class GatewayConfig {
     @Value("${ide.ide-proxy-domain:kube-proxy.amdp-dev.skamdp.org}")
     private String domainUrl;
 
-    public GatewayConfig(ProxyRouterService proxyRouterService, ExchangeHandler exchangeHandler) {
+    public GatewayConfig(ProxyRouterService proxyRouterService) {
         this.proxyRouterService = proxyRouterService;
         //this.tokenResponseUtil = tokenResponseUtil;
     }

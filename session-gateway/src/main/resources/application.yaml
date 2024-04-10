@@ -27,7 +27,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: busrefresh
+        include: gateway,netty
 ---
 spring:
   config:
@@ -49,7 +49,7 @@ spring:
   datasource:
     url: jdbc:mariadb://database-1.c7vhecmevmrc.ap-northeast-2.rds.amazonaws.com/mydevdb?allowMultiQueries=true
     username: admin
-    password: ${DATASOURCE_PASSWORD}
+    password: ywyi1004
     driver-class-name: org.mariadb.jdbc.Driver
     hikari:
       idle-timeout: 300
@@ -153,7 +153,7 @@ spring:
           keycloak:
             issuer-uri: https://console-dev.skamdp.org/iam/realms/amdp-dev
         registration:
-          ${KEYCLOAK_CLIENT_ID}:
+          kube-proxy-renew:
             provider: keycloak
             client-id: ${KEYCLOAK_CLIENT_ID}
             client-secret: ${KEYCLOAK_CLIENT_SECRET}

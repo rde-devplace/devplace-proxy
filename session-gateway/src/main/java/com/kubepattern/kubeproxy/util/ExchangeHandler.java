@@ -1,46 +1,20 @@
 package com.kubepattern.kubeproxy.util;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-@Component
 public class ExchangeHandler {
 
-    /*
-    @Value("${ide.ide-proxy-host-pattern:^(.+?)z([0-9]+)\\.kube-proxy\\.amdp-dev\\.skamdp\\.org$}")
-    private String hostPattern;
-    @Value("${ide.ide-proxy-subdomain-pattern:^([^z]+)}")
-    private String subdomainPattern;
 
-    private final Pattern HOST_PATTERN;
-    private final Pattern SUBDOMAIN_PATTERN;
-
-    public static final int EXTRACT_USER_NAME = 1;
-    public static final int EXTRACT_PORT_NUMBER = 2;
-    public static final int EXTRACT_SERVICE_NAME = 3;
-    public static final String NONE = "none";
-*/
-    private final ReactiveOAuth2AuthorizedClientService authorizedClientService;
-
-    public ExchangeHandler(ReactiveOAuth2AuthorizedClientService authorizedClientService) {
-        this.authorizedClientService = authorizedClientService;
-        //this.HOST_PATTERN = Pattern.compile(this.hostPattern);
-        //this.SUBDOMAIN_PATTERN = Pattern.compile(this.subdomainPattern);
-    }
-
-    public Mono<String> addTokenToResponse(ServerWebExchange exchange, SecurityContext context) {
+    public static Mono<String> addTokenToResponse(ReactiveOAuth2AuthorizedClientService authorizedClientService, SecurityContext context) {
         return Mono.justOrEmpty(context.getAuthentication())
                 .filter(authentication -> authentication instanceof OAuth2AuthenticationToken)
                 .cast(OAuth2AuthenticationToken.class)
@@ -51,12 +25,12 @@ public class ExchangeHandler {
                 .map(authorizedClient -> {
                     OAuth2AuthorizedClient client = (OAuth2AuthorizedClient) authorizedClient;
                     String accessTokenValue = client.getAccessToken().getTokenValue();
-                    return accessTokenValue;
                     // exchange.getResponse().getHeaders().setBearerAuth(accessTokenValue);
+                    return accessTokenValue;
                 });
     }
 
-    public Optional<String> extractSessionId(ServerWebExchange exchange, String cookieName) {
+    public static Optional<String> extractSessionId(ServerWebExchange exchange, String cookieName) {
         HttpHeaders headers = exchange.getRequest().getHeaders();
         List<String> cookies = headers.get(HttpHeaders.COOKIE);
 
@@ -74,7 +48,7 @@ public class ExchangeHandler {
         return Optional.empty();
     }
 
-    public String extractSubdomain(ServerWebExchange exchange) {
+    public static String extractSubdomain(ServerWebExchange exchange) {
         String host = exchange.getRequest().getURI().getHost();
         String[] parts = host.split("\\.");
 
@@ -87,39 +61,21 @@ public class ExchangeHandler {
         }
     }
 
+    public static Optional<String> extractBearerToken(ServerWebExchange exchange) {
+        List<String> authorizationHeaders = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION);
 
-    /*
-    public String getFieldFromHost(String host, Integer type) {
-        Matcher matcher = HOST_PATTERN.matcher(host);
-
-        switch(type) {
-            case EXTRACT_USER_NAME:  // host에 포함된 계정 이름 추출
-                if (matcher.matches()) {
-                    // himang10-8080.kube-proxy.amdp-dev.skamdp.org 형태의 host에서 himanag10을 추출
-                    String firstName = matcher.group(1);
-                    Matcher subDomainMatcher = SUBDOMAIN_PATTERN.matcher(firstName);
-                    String sdUser = subDomainMatcher.find()? subDomainMatcher.group(1): "none";
-                    return sdUser;
-                }
-                break;
-            case EXTRACT_PORT_NUMBER: // host에 포함된 포트 번호 추출
-                if (matcher.matches()) {
-                    // himang10-8080.kube-proxy.amdp-dev.skamdp.org 형태의 host에서 8080을 추출
-                    String portNumber = matcher.group(2);
-                    return portNumber;
-                }
-                break;
-            case EXTRACT_SERVICE_NAME: // host에 포함된 서비스 이름 추출
-                if (matcher.matches()) {
-                    String serviceNamePrefix = matcher.group(1);
-                    return serviceNamePrefix;
-                }
-                break;
+        if (authorizationHeaders == null || authorizationHeaders.isEmpty()) {
+            return Optional.empty();
         }
-        return NONE;
-    }
 
-     */
+        for (String header : authorizationHeaders) {
+            if (header.toLowerCase().startsWith("bearer ")) {
+                return Optional.of(header.substring(7));  // "Bearer " 다음의 문자열을 추출
+            }
+        }
+
+        return Optional.empty();
+    }
 
 }
 

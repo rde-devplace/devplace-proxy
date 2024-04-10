@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.stereotype.Component;
@@ -27,17 +28,14 @@ import java.util.regex.Pattern;
 @Component
 public class AuthenticationFilter implements GlobalFilter, Ordered {
 
-    private final ServerSecurityContextRepository serverSecurityContextRepository;
-    private final ExchangeHandler exchangeHandler;
+    private final ReactiveOAuth2AuthorizedClientService authorizedClientService;
 
     @Value("${kubeproxy.domain.url:kube-proxy.amdp-dev.skamdp.org}")
     private String domainUrl;
 
 
-    public AuthenticationFilter(ServerSecurityContextRepository serverSecurityContextRepository,
-                                ExchangeHandler exchangeHandler) {
-        this.serverSecurityContextRepository = serverSecurityContextRepository;
-        this.exchangeHandler = exchangeHandler;
+    public AuthenticationFilter(ReactiveOAuth2AuthorizedClientService authorizedClientService) {
+        this.authorizedClientService = authorizedClientService;
     }
 
     @Override
@@ -49,7 +47,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
         String sessionId = exchange.getRequest().getCookies().getFirst("SESSION").getValue();
         if(sessionId != null) {
-            String sessionString = "SESSION=" + exchangeHandler.extractSessionId(exchange, "SESSION").get() + "; Path=/; Domain=." + this.domainUrl + "; Secure; SameSite=None";
+            String sessionString = "SESSION=" + ExchangeHandler.extractSessionId(exchange, "SESSION").get() + "; Path=/; Domain=." + this.domainUrl + "; Secure; SameSite=None";
             exchange.getResponse().getHeaders().add("Set-Cookie", sessionString);
         }
         Mono<SecurityContext> sercurityContextMono = exchange.getPrincipal()
@@ -65,7 +63,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                 .filter(securityContext -> securityContext.getAuthentication() != null)
                 .map(securityContext -> {
 
-                    this.exchangeHandler.addTokenToResponse(exchange, securityContext)
+                    ExchangeHandler.addTokenToResponse(authorizedClientService, securityContext)
                             .subscribe(token -> {
                                 log.debug("###### token: {}", token);
                                 String cookieString = "access_token=" + token + "; Path=/; Domain=." + this.domainUrl + "; Secure; SameSite=None";

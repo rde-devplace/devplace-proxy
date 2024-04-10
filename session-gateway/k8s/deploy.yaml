@@ -14,7 +14,7 @@ spec:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8081'
         prometheus.io/path: '/actuator/prometheus'
-        update: 4dc2d7b4381f58718b7166a3fe03af9a
+        update: 670cb51044e0bc3b96067578db961495
       labels:
         app: kube-proxy
     spec:

@@ -3,9 +3,7 @@
 /Users/himang10/mydev/oss-devplace/devplace-proxy/session-gateway/src/main/java/com/kubepattern/kubeproxy/model/ProxyRouterId.java
 /Users/himang10/mydev/oss-devplace/devplace-proxy/session-gateway/src/main/java/com/kubepattern/kubeproxy/model/OAuth2AuthenticationDetails.java
 /Users/himang10/mydev/oss-devplace/devplace-proxy/session-gateway/src/main/java/com/kubepattern/kubeproxy/repo/ProxyRouterRepository.java
-/Users/himang10/mydev/oss-devplace/devplace-proxy/session-gateway/src/main/java/com/kubepattern/kubeproxy/repo/JdbcSecurityContextRepository.java
 /Users/himang10/mydev/oss-devplace/devplace-proxy/session-gateway/src/main/java/com/kubepattern/kubeproxy/model/ProxyRouter.java
-/Users/himang10/mydev/oss-devplace/devplace-proxy/session-gateway/src/main/java/com/kubepattern/kubeproxy/service/KeycloakServerLogoutHandler.java
 /Users/himang10/mydev/oss-devplace/devplace-proxy/session-gateway/src/main/java/com/kubepattern/kubeproxy/config/OAuth2LoginWebFluxSecurityConfig.java
 /Users/himang10/mydev/oss-devplace/devplace-proxy/session-gateway/src/main/java/com/kubepattern/kubeproxy/filters/AuthenticationFilter.java
 /Users/himang10/mydev/oss-devplace/devplace-proxy/session-gateway/src/main/java/com/kubepattern/kubeproxy/util/SVCPathGenerator.java

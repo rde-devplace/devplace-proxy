@@ -1,5 +1,6 @@
 package com.kubepattern.kubeproxy.filters;
 
+import com.kubepattern.kubeproxy.util.ExchangeHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
@@ -12,6 +13,7 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,6 +36,18 @@ public class CookieFilter implements WebFilter, Ordered {
             if (headers.getLocation() != null && headers.getLocation().getPath().equals("/login?error")) {
                 URI newLocation = URI.create("/console/"); // 새로운 위치로 수정
                 headers.setLocation(newLocation);
+            }
+
+            // access-token을 Authorization Bearer에 포함시킴
+            Optional<String> authToken = ExchangeHandler.extractBearerToken(exchange);
+            if(authToken.isPresent()) {
+                log.debug("JdbcSecurityContextRepository.load - authToken : {}", authToken.get());
+            } else {
+                Optional<String> token = ExchangeHandler.extractSessionId(exchange, "access-token");
+                if(token != null && token.isPresent()) {
+                    log.debug("JdbcSecurityContextRepository.load - token : {}", token);
+                    exchange.getRequest().getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + token.get());
+                }
             }
         }));
     }

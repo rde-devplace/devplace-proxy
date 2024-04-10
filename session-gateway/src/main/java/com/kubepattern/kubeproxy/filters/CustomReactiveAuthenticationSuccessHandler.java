@@ -1,9 +1,6 @@
 package com.kubepattern.kubeproxy.filters;
 
 import com.google.gson.Gson;
-import com.kubepattern.kubeproxy.model.SecurityContextEntity;
-import com.kubepattern.kubeproxy.repo.JdbcSecurityContextRepository;
-
 import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.server.WebFilterExchange;
@@ -12,11 +9,9 @@ import reactor.core.publisher.Mono;
 
 public class CustomReactiveAuthenticationSuccessHandler implements ServerAuthenticationSuccessHandler {
 
-    private final JdbcSecurityContextRepository jdbcSecurityContextRepository;
     private final Gson gson;
 
-    public CustomReactiveAuthenticationSuccessHandler(JdbcSecurityContextRepository jdbcSecurityContextRepository, Gson gson) {
-        this.jdbcSecurityContextRepository = jdbcSecurityContextRepository;
+    public CustomReactiveAuthenticationSuccessHandler (Gson gson) {
         this.gson = gson;
     }
 
