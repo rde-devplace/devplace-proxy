@@ -14,7 +14,7 @@ spec:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8081'
         prometheus.io/path: '/actuator/prometheus'
-        update: 670cb51044e0bc3b96067578db961495
+        update: cf94e35b50a1cac975a2ee4be934124e
       labels:
         app: kube-proxy
     spec:
@@ -22,7 +22,7 @@ spec:
       - name: harbor-registry-secret
       containers:
       - name: kube-proxy
-        image: amdp-registry.skamdp.org/mydev-ywyi/kube-proxy:IDE.1.0.5
+        image: amdp-registry.skamdp.org/mydev-ywyi/kube-proxy:IDE.1.0.6.TEST
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

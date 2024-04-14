@@ -11,7 +11,7 @@ metadata:
     nginx.ingress.kubernetes.io/affinity: "cookie" # 쿠키 기반 어피니티 활성화
     nginx.ingress.kubernetes.io/session-cookie-name: "SESSION" # 세션 쿠키의 이름 설정
   name: kube-proxy-ingress
-  namespace: kube-pattern
+  namespace: part-rde
 spec:
   rules:
   - host: kube-proxy.amdp-dev.skamdp.org
