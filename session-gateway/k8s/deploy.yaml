@@ -14,7 +14,7 @@ spec:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '8081'
         prometheus.io/path: '/actuator/prometheus'
-        update: cf94e35b50a1cac975a2ee4be934124e
+        update: f60275ea0b3431b0864e73561db8556e
       labels:
         app: kube-proxy
     spec:
@@ -22,13 +22,13 @@ spec:
       - name: harbor-registry-secret
       containers:
       - name: kube-proxy
-        image: amdp-registry.skamdp.org/mydev-ywyi/kube-proxy:IDE.1.0.6.TEST
+        image: amdp-registry.skamdp.org/mydev-ywyi/kube-proxy:IDE.1.0.6.INT
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
         env:
         - name: LOGGING_LEVEL
-          value: DEBUG
+          value: INFO
         - name: DATASOURCE_URL
           valueFrom:
             secretKeyRef:

@@ -9,5 +9,4 @@ public interface ProxyRouterRepository extends JpaRepository<ProxyRouter, ProxyR
     List<ProxyRouter> deleteByUserName(String userName);
     List<ProxyRouter> deleteBySvcFullName(String svcFullName);
     List<ProxyRouter> deleteBySvcFullNameAndPortNumber(String svcFullName, String portNumber);
-    List<ProxyRouter> findAllBySvcFullNameAndPortNumber(String svcFullName, String portNumber);
 }

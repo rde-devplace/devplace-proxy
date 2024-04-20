@@ -83,6 +83,8 @@ spring:
               - email
 ide:
   ide-proxy-domain: "localhost:8080"
+  authorization:
+    token-paths:  /api, /ide-manager
 ---
 server:
   port: 8080
@@ -95,6 +97,8 @@ logging:
     org.springframework.http.server.reactive: ${LOGGING_LEVEL}
 ide:
   ide-proxy-domain: ${IDE_PROXY_DOMAIN}
+  authorization:
+    token-paths: /api, /ide-manager
 
 spring:
   config:
@@ -145,9 +149,11 @@ spring:
   security:
     oauth2:
       resourceserver:
-        jwt:
-          jwt-set-uri: https://console-dev.skamdp.org/iam/realms/amdp-dev/protocol/openid-connect/certs
-          issuer-uri: https://console-dev.skamdp.org/iam/realms/amdp-dev
+        opaquetoken:
+          introspection-uri: https://console-dev.skamdp.org/iam/realms/amdp-dev/protocol/openid-connect/token/introspect
+          client-id: ${KEYCLOAK_CLIENT_ID}
+          client-secret: ${KEYCLOAK_CLIENT_SECRET}
+          authorization-grant-type: client_credentials
       client:
         provider:
           keycloak:

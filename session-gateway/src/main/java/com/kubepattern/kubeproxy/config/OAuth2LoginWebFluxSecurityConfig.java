@@ -72,6 +72,44 @@ public class OAuth2LoginWebFluxSecurityConfig {
         );
         //KeycloakServerLogoutHandler keycloakServerLogoutHandler = new KeycloakServerLogoutHandler(handler, customSecurityContextRepository);
 
+        http
+                .oauth2ResourceServer(
+                oauth2ResourceServer -> oauth2ResourceServer.jwt(jwt -> jwt.jwtDecoder(reactiveJwtDecoder())))
+                .oauth2Login(oauth2 -> oauth2
+                        .authenticationMatcher(new PathPatternParserServerWebExchangeMatcher("/login/oauth2/code/{registrationId}")))
+                .authorizeExchange(exchange -> exchange
+                        //.pathMatchers("/api/ide-configs/**").authenticated()
+                        .pathMatchers(
+                                "/actuator/**",
+                                "/list",
+                                "/api/route/refresh",
+                                "/listRoutes",
+                                "/api/route",
+                                "/api/route/**",
+                                "/logout.html").permitAll()
+                        .anyExchange().authenticated()
+                )
+                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.mode(XFrameOptionsServerHttpHeadersWriter.Mode.SAMEORIGIN)))
+                .csrf(csrf -> csrf.disable())
+                .logout(logout -> logout
+                                //.logoutHandler(keycloakServerLogoutHandler)
+                                .logoutSuccessHandler((message, authentication) -> {
+                                    String sessionId = message.getExchange().getRequest().getCookies().getFirst("SESSION").getValue();
+                                    message.getExchange().getResponse().setStatusCode(HttpStatus.OK);
+                                    String uri = this.issuerUri + "/protocol/openid-connect/logout?redirect_uri=https://" + this.domainUrl + "/list";
+
+                                    RedirectServerLogoutSuccessHandler successHandler = new RedirectServerLogoutSuccessHandler();
+                                    successHandler.setLogoutSuccessUrl(URI.create(uri));
+
+                                    log.debug("logoutSuccessHandler sessionId: {}", sessionId);
+                                    return logoutSuccessHandler().onLogoutSuccess(message, authentication);
+                                    //return handler.logout(message, authentication);
+                                })
+                                //.logoutSuccessHandler(logoutSuccessHandler())
+                        );
+
+
+/*
         http.authorizeExchange(
                 exchange -> exchange.pathMatchers(
                         "/actuator/**",
@@ -110,7 +148,7 @@ public class OAuth2LoginWebFluxSecurityConfig {
                                 //.logoutSuccessHandler(logoutSuccessHandler())
                 );
 
-
+*/
         // Custom Security Context 처리를 추가한다.
         //http.securityContextRepository(jdbcSecurityContextRepository());
 

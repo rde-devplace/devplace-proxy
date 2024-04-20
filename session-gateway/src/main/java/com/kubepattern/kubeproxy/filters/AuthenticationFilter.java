@@ -21,6 +21,8 @@ import reactor.core.publisher.Mono;
 
 
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,8 +32,11 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     private final ReactiveOAuth2AuthorizedClientService authorizedClientService;
 
-    @Value("${kubeproxy.domain.url:kube-proxy.amdp-dev.skamdp.org}")
+    @Value("${ide.ide-proxy-domain}")
     private String domainUrl;
+
+    @Value("${ide.authorization.token-paths}")
+    private List<String> tokenPaths;
 
 
     public AuthenticationFilter(ReactiveOAuth2AuthorizedClientService authorizedClientService) {
@@ -41,15 +46,19 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
-        //log.debug("######################## AuthenticationFilter filter() host: {} path: {} uri: {}",
-        //        exchange.getRequest().getHeaders().getHost(), exchange.getRequest().getPath(), exchange.getRequest().getURI());
-        log.debug("###### header = {} ", exchange.getRequest().getHeaders());
+        for(String path : tokenPaths) {
+            if(exchange.getRequest().getURI().getPath().startsWith(path)) {
+                return chain.filter(exchange);
+            }
+        }
 
+        /* Session 정보를 추가하면서 문제가 발생하여 제거
         String sessionId = exchange.getRequest().getCookies().getFirst("SESSION").getValue();
         if(sessionId != null) {
             String sessionString = "SESSION=" + ExchangeHandler.extractSessionId(exchange, "SESSION").get() + "; Path=/; Domain=." + this.domainUrl + "; Secure; SameSite=None";
             exchange.getResponse().getHeaders().add("Set-Cookie", sessionString);
         }
+         */
         Mono<SecurityContext> sercurityContextMono = exchange.getPrincipal()
                 .flatMap(principal -> {
                     if (principal instanceof Authentication) {
@@ -59,6 +68,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                 });
 
 
+
         return sercurityContextMono
                 .filter(securityContext -> securityContext.getAuthentication() != null)
                 .map(securityContext -> {
@@ -66,10 +76,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                     ExchangeHandler.addTokenToResponse(authorizedClientService, securityContext)
                             .subscribe(token -> {
                                 log.debug("###### token: {}", token);
-                                String cookieString = "access_token=" + token + "; Path=/; Domain=." + this.domainUrl + "; Secure; SameSite=None";
-                                //String cookieString = "access_token=" + token + "; Path=/; Secure; SameSite=None";
-                                //exchange.getResponse().getHeaders().setBearerAuth(token);
-                                exchange.getResponse().getHeaders().add("Set-Cookie", cookieString);
+                                //String cookieString = "access_token=" + token + "; Path=/; Domain=." + this.domainUrl + "; Secure; SameSite=None";
+                                //exchange.getResponse().getHeaders().add("Set-Cookie", cookieString);
 
                             });
                     return (OAuth2User) securityContext.getAuthentication().getPrincipal();
@@ -117,7 +125,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -10000; // 필터 순서를 높게 설정하여 가장 먼저 실행되도록 합니다.
+        return -10001; // 필터 순서를 높게 설정하여 가장 먼저 실행되도록 합니다.
     }
 }
 
