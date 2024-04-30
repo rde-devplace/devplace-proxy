@@ -8,6 +8,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -55,8 +56,18 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
         log.debug("######################## AuthenticationFilter filter() host: {} path: {} uri: {}",
                 exchange.getRequest().getHeaders().getHost(), exchange.getRequest().getPath(), exchange.getRequest().getURI());
-        log.debug("###### header = {} ", exchange.getRequest().getHeaders());
 
+
+        /* PRE-SESSION을 등록 관리 */
+        //HttpCookie sessionCookie = exchange.getRequest().getCookies().getFirst("SESSION");
+        List<HttpCookie> sessionCookies = exchange.getRequest().getCookies().get("SESSION");
+        HttpCookie preSessionCookie = exchange.getRequest().getCookies().getFirst("PRE-SESSION");
+        if (!sessionCookies.isEmpty()) {
+            int i = sessionCookies.size() - 1;
+            log.debug("###### sessionCookies : {}  preSessionCookie : {}", sessionCookies, preSessionCookie);
+            String sessionString = "PRE-SESSION=" + sessionCookies.get(i).getValue() + "; Path=/; Domain=." + this.domainUrl + "; Secure; httpOnly; SameSite=None";
+            exchange.getResponse().getHeaders().add("Set-Cookie", sessionString);
+        }
 
         Mono<SecurityContext> sercurityContextMono = exchange.getPrincipal()
                 .flatMap(principal -> {

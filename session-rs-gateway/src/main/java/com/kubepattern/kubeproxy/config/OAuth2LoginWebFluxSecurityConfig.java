@@ -23,6 +23,8 @@ import org.springframework.security.web.server.context.ServerSecurityContextRepo
 import org.springframework.security.web.server.header.ClearSiteDataServerHttpHeadersWriter;
 import org.springframework.security.web.server.header.XFrameOptionsServerHttpHeadersWriter;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
+import org.springframework.web.server.session.CookieWebSessionIdResolver;
+import org.springframework.web.server.session.WebSessionIdResolver;
 
 
 import java.net.URI;
@@ -70,7 +72,6 @@ public class OAuth2LoginWebFluxSecurityConfig {
                         ClearSiteDataServerHttpHeadersWriter.Directive.EXECUTION_CONTEXTS
                 )
         );
-        //KeycloakServerLogoutHandler keycloakServerLogoutHandler = new KeycloakServerLogoutHandler(handler, customSecurityContextRepository);
 
         http
                 .oauth2ResourceServer(
@@ -105,54 +106,24 @@ public class OAuth2LoginWebFluxSecurityConfig {
                                     return logoutSuccessHandler().onLogoutSuccess(message, authentication);
                                     //return handler.logout(message, authentication);
                                 })
-                                //.logoutSuccessHandler(logoutSuccessHandler())
                         );
 
-
-/*
-        http.authorizeExchange(
-                exchange -> exchange.pathMatchers(
-                        "/actuator/**",
-                        "/list",
-                        "/api/route/refresh",
-                        "/listRoutes",
-                        "/api/route",
-                        "/api/route/**",
-                        "/logout.html").permitAll()
-                )
-                .headers(
-                        headers -> headers.frameOptions(
-                                frameOptions -> frameOptions.mode(XFrameOptionsServerHttpHeadersWriter.Mode.SAMEORIGIN)
-                        )
-                )
-                .oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt(jwt-> jwt.jwtDecoder(reactiveJwtDecoder())))
-                .oauth2Login(oauth2 -> oauth2
-                        .authenticationMatcher(new PathPatternParserServerWebExchangeMatcher("/login/oauth2/code/{registrationId}"))
-                )
-                .csrf(csrf -> csrf.disable())
-                .authorizeExchange(authorize -> authorize.anyExchange().authenticated())
-                .logout(logout -> logout
-                                //.logoutHandler(keycloakServerLogoutHandler)
-                                .logoutSuccessHandler((message, authentication) -> {
-                                    String sessionId = message.getExchange().getRequest().getCookies().getFirst("SESSION").getValue();
-                                    message.getExchange().getResponse().setStatusCode(HttpStatus.OK);
-                                    String uri = this.issuerUri + "/protocol/openid-connect/logout?redirect_uri=https://" + this.domainUrl + "/list";
-
-                                    RedirectServerLogoutSuccessHandler successHandler = new RedirectServerLogoutSuccessHandler();
-                                    successHandler.setLogoutSuccessUrl(URI.create(uri));
-
-                                    log.debug("logoutSuccessHandler sessionId: {}", sessionId);
-                                    return logoutSuccessHandler().onLogoutSuccess(message, authentication);
-                                    //return handler.logout(message, authentication);
-                                })
-                                //.logoutSuccessHandler(logoutSuccessHandler())
-                );
-
-*/
-        // Custom Security Context 처리를 추가한다.
-        //http.securityContextRepository(jdbcSecurityContextRepository());
-
         return http.build();
+    }
+
+    @Bean
+    public WebSessionIdResolver webSessionIdResolver() {
+        CookieWebSessionIdResolver resolver = new CookieWebSessionIdResolver();
+        resolver.setCookieName("SESSION"); // 세션 쿠키 이름 설정
+        resolver.addCookieInitializer(builder -> {
+            builder.domain("." + this.domainUrl);
+            builder.path("/");
+            builder.secure(true);
+            builder.httpOnly(true);
+            builder.sameSite("None");
+            builder.maxAge(1800);
+        }); // 쿠키 도메인 설정
+        return resolver;
     }
 
 
